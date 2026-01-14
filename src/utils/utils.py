@@ -1,0 +1,28 @@
+natures = {
+    "HARDY": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1},
+    "LONELY": {"atk": 1.1, "def": 0.9, "spatk": 1, "spdef": 1, "spd": 1},
+    "BRAVE": {"atk": 1.1, "def": 1, "spatk": 1, "spdef": 1, "spd": 0.9},
+    "ADAMANT": {"atk": 1.1, "def": 1, "spatk": 0.9, "spdef": 1, "spd": 1},
+    "NAUGHTY": {"atk": 1.1, "def": 1, "spatk": 1, "spdef": 0.9, "spd": 1},
+    "BOLD": {"atk": 0.9, "def": 1.1, "spatk": 1, "spdef": 1, "spd": 1},
+    "DOCILE": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1},
+    "RELAXED": {"atk": 1, "def": 1.1, "spatk": 1, "spdef": 1, "spd": 0.9},
+    "IMPISH": {"atk": 1, "def": 1.1, "spatk": 0.9, "spdef": 1, "spd": 1},
+    "LAX": {"atk": 1, "def": 1.1, "spatk": 1, "spdef": 0.9, "spd": 1},
+    "TIMID": {"atk": 0.9, "def": 1, "spatk": 1, "spdef": 1, "spd": 1.1},
+    "HASTY": {"atk": 1, "def": 0.9, "spatk": 1, "spdef": 1, "spd": 1.1},
+    "SERIOUS": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1},
+    "JOLLY": {"atk": 1, "def": 1, "spatk": 0.9, "spdef": 1, "spd": 1.1},
+    "NAIVE": {"atk": 1, "def": 1, "spatk": 1, "spdef": 0.9, "spd": 1.1},
+    "MODEST": {"atk": 0.9, "def": 1, "spatk": 1.1, "spdef": 1, "spd": 1},
+    "MILD": {"atk": 1, "def": 0.9, "spatk": 1.1, "spdef": 1, "spd": 1},
+    "QUIET": {"atk": 1, "def": 1, "spatk": 1.1, "spdef": 1, "spd": 0.9},
+    "BASHFUL": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1},
+    "RASH": {"atk": 1, "def": 1, "spatk": 1.1, "spdef": 0.9, "spd": 1},
+    "CALM": {"atk": 0.9, "def": 1, "spatk": 1, "spdef": 1.1, "spd": 1},
+    "GENTLE": {"atk": 1, "def": 0.9, "spatk": 1, "spdef": 1.1, "spd": 1},
+    "SASSY": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1.1, "spd": 0.9},
+    "CAREFUL": {"atk": 1, "def": 1, "spatk": 0.9, "spdef": 1.1, "spd": 1},
+    "QUIRKY": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1}
+}
+
