@@ -1,12 +1,12 @@
 import math
 
-from .Pokemon import Pokemon
-from utils.utils import natures
+from .pokemon import Pokemon
+from utils import natures
 
 class CompetitivePokemon(Pokemon):
-    def __init__(self, name: str, types: list, id: int, base_stats: dict, abilities: list, height: float, weight: float, move_list: list,
-                 ability: str, item: str, nature: str, ivs: dict, evs: dict, moves: list, level: int):
-        super().__init__(name, types, id, base_stats, abilities, height, weight, move_list)
+    def __init__(self, name: str, types: list, id: int, base_stats: dict, abilities: list, height: float, weight: float, move_list: list, img_url: str,
+                 ability: str, item: str, nature: str, ivs: dict, evs: dict, moves: list):
+        super().__init__(name, types, id, base_stats, abilities, height, weight, move_list, img_url)
         self.ability = ability
         self.item = item
         self.nature = nature.upper()

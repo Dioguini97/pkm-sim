@@ -1,4 +1,4 @@
-from api.PokeAPI import PokeAPIService, PokeAPIError
+from api.pokeAPI import PokeAPIService, PokeAPIError
 import pytest
 
 poke_api_service = PokeAPIService()

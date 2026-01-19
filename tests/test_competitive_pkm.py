@@ -1,5 +1,5 @@
 import pytest
-from src.entities.CompetitivePokemon import CompetitivePokemon
+from src.entities.competitive_pokemon import CompetitivePokemon
 
 def test_competitive_pokemon_initialization():
     ivs = {'hp': 31, 'atk': 31, 'def': 31, 'spatk': 31, 'spdef': 31, 'spd': 31}
@@ -25,7 +25,10 @@ def test_competitive_pokemon_initialization():
         ivs=ivs,
         evs=evs,
         moves=moves,
-        level=50
+        height=210,
+        weight=905,
+        move_list=moves,
+        img_url="http://example.com/charizard.png"
     )
 
     assert charizard.name == "Charizard"
@@ -47,3 +50,4 @@ def test_competitive_pokemon_initialization():
         'spdef': 106,
         'spd': 167
     }
+

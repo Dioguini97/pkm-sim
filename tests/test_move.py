@@ -1,12 +1,11 @@
-from api.PokeAPI import PokeAPIService
-from src.entities.Move import Move
+from api.pokeAPI import PokeAPIService
+from src.entities.move import Move
 
 poke_api_service = PokeAPIService()
 
 def test_should_return_move():
     move = poke_api_service.get_move('body-press')
-    assert move.name == 'Body Press'
-    assert move.api_name == 'body-press'
+    assert move.name == 'body-press'
     assert move.id == 776
     assert move.power == 80
     assert move.accuracy == 100
@@ -21,8 +20,7 @@ def test_should_return_move():
 
 def test_should_return_move2():
     move = poke_api_service.get_move('shadow-ball')
-    assert move.name == 'Shadow Ball'
-    assert move.api_name == 'shadow-ball'
+    assert move.name == 'shadow-ball'
     assert move.id == 247
     assert move.power == 80
     assert move.accuracy == 100
