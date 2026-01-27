@@ -1,6 +1,4 @@
-import pytest
-
-from entities import Pokemon, Move
+from api.models import Pokemon, Move
 from src.data import Cache
 
 CACHE = Cache()
@@ -82,3 +80,29 @@ def test_should_add_move_if_not_in_cache():
     CACHE.add_move_to_cache(test_move)
 
     assert CACHE.is_move_in_cache("test-move")
+
+def test_should_get_pkm_species_from_cache_with_4_attributes():
+    test_pkm = CACHE.get_pokemon_species_from_cache("applin")
+    assert test_pkm.does_it_evolve
+
+    test_pkm = CACHE.get_pokemon_species_from_cache("flapple")
+    assert not test_pkm.does_it_evolve
+
+    test_pkm = CACHE.get_pokemon_species_from_cache("appletun")
+    assert not test_pkm.does_it_evolve
+
+    test_pkm = CACHE.get_pokemon_species_from_cache("dipplin")
+    assert test_pkm.does_it_evolve
+
+    test_pkm = CACHE.get_pokemon_species_from_cache("hydrapple")
+    assert not test_pkm.does_it_evolve
+
+    test_pkm = CACHE.get_pokemon_species_from_cache("pikachu")
+    assert test_pkm.does_it_evolve
+
+    test_pkm = CACHE.get_pokemon_species_from_cache("electabuzz")
+    assert test_pkm.does_it_evolve
+
+    test_pkm = CACHE.get_pokemon_species_from_cache("parasect")
+    assert not test_pkm.does_it_evolve
+

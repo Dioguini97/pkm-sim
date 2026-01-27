@@ -1,9 +1,8 @@
-import pytest
-
 from data import Cache
-from entities import CompetitivePokemon, Move
-from pkm_sim.battle_env.field import Field
-from pkm_sim.battle_env.pokemon import BattlePokemon
+from api.models import CompetitivePokemon
+from pkm_sim.battle_env.entities.ailment import Burn
+from pkm_sim.battle_env.entities.field import Field
+from pkm_sim.battle_env.entities.pokemon import BattlePokemon
 from pkm_sim.battle_env.turn import Turn, Action
 
 cache = Cache()
@@ -26,7 +25,9 @@ pkm_1 = BattlePokemon(CompetitivePokemon(
     nature="JOLLY",
     ivs={"hp": 31, "atk": 31, "def": 31, "spatk": 31, "spdef": 31, "spd": 31},
     evs={"hp": 0, "atk": 252, "def": 0, "spatk": 0, "spdef": 4, "spd": 252},
-    moves=["thunderbolt", "quick-attack", "iron-tail", "volt-switch"]
+    moves=["thunderbolt", "quick-attack", "iron-tail", "volt-switch"],
+    varieties=pika.varieties,
+    evolution_chain_id=pika.evolution_chain_id
 ))
 
 pkm_2 = BattlePokemon(CompetitivePokemon(
@@ -44,7 +45,9 @@ pkm_2 = BattlePokemon(CompetitivePokemon(
     nature="CALM",
     ivs={"hp": 31, "atk": 31, "def": 31, "spatk": 31, "spdef": 31, "spd": 31},
     evs={"hp": 252, "atk": 0, "def": 0, "spatk": 252, "spdef": 4, "spd": 0},
-    moves=["vine-whip", "quick-attack", "razor-leaf", "sleep-powder"]
+    moves=["vine-whip", "quick-attack", "razor-leaf", "sleep-powder"],
+    varieties=bulba.varieties,
+    evolution_chain_id=bulba.evolution_chain_id
 ))
 
 def test_battle_pkm_init():
@@ -103,9 +106,11 @@ def test_turn_order_action():
     assert ordered_actions[1].user == pkm_1
 
 
-def test():
-    team = [pkm_1, pkm_2, pkm_1]
-    variavel = [True for pkm in team if pkm.current_hp <= 0]
+def test_ailment_burn():
+    pkm_1.set_ailment_status(Burn(pkm_1))
+    pkm_1.apply_status_effect()
+    assert pkm_1.current_hp == pkm_1.hp_total - (pkm_1.hp_total // 16)
+
 
 
 

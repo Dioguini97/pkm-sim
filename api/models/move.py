@@ -1,39 +1,8 @@
-MOVE_TARGET_ENUM = [
-    'specific-move', # p.e. Curse, Counter
-    'selected-pokemon-me-first', # p.e. me-first, max moves
-    'ally', # p.e. Helping Hand
-    'users-field', # p.e. Reflect, Light Screen, Tailwind
-    'user-or-ally', # p.e. acupressure (only)
-    'opponents-field', # p.e. Stealth Rock, Spikes
-    'user', # p.e. Swords Dance, Recover
-    'random-opponent', # p.e. Thrash, Outrage, Struggle
-    'all-other-pokemon', # p.e. Earthquake, Surf
-    'selected-pokemon', # p.e. Shadow Ball, Flamethrower
-    'all-opponents', # p.e. Blizzard, Rock Slide
-    'entire-field', # p.e. Hail, Rain Dance, Trick Room, Grassy Terrain
-    'user-and-allies', # p.e. life-dew, howl
-    'all-pokemon',  # p.e. Perish Song
-    'all-allies', # p.e. Dragon Cheer
-    'fainting-pokemon' # p.e. Revival Blessing
-]
-
-MOVE_AILMENT_ENUM = [
-    'none',
-    'paralysis',
-    'sleep',
-    'freeze',
-    'burn',
-    'poison',
-    'confusion',
-    'infatuation',
-    'trap',
-    'nightmare'
-]
-
 class Move:
     def __init__(self, id: int, name: str, power: int, accuracy: int, move_type: str, effect_chance: int, damage_class: str, pp: int, priority: int,
-                 stat_changes: list, target: str, entries: str, ailment: str, ailment_chance: int, category: str, crit_rate: int,
-                 drain: int, flinch_chance: int, healing: int, min_hits: int|None, max_hits: int|None, min_turns: int|None, max_turns: int|None, stat_chance: int):
+                 stat_changes: list, target: str, entries: str, ailment: str, ailment_chance: int, category: str, min_hits: int|None,
+                 max_hits: int|None, min_turns: int|None, max_turns: int|None, stat_chance: int,crit_rate: int = 0,
+                 drain: int = 0, flinch_chance: int = 0, healing: int = 0):
         self.name = name
         self.power = power
         self.move_type = move_type
@@ -42,7 +11,7 @@ class Move:
         self.damage_class = damage_class  # e.g., Physical, Special, Status
         self.pp = pp
         self.priority = priority
-        self.stat_changes = stat_changes  # e.g., ('spdef', -1)
+        self.stat_changes = stat_changes  # e.g., [['spdef', -1]]
         self.target = target  # e.g., 'selected-pokemon', 'all-opponents'
         self.entries = entries  # e.g., "May lower the target's Special Defense by 1 stage."
         self.id = id
@@ -58,9 +27,17 @@ class Move:
         self.min_turns = min_turns
         self.max_turns = max_turns
         self.stat_chance = stat_chance
+        # self.special_move_stat()
 
     def __repr__(self):
         return f"name={self.name}, power={self.power}, accuracy={self.accuracy}, pp={self.pp}\n{self.effect_entries}"
+
+    def special_move_stat(self):
+        if self.name is 'body-press':
+            self.atk_stat_used = 'def'
+        if self.name is 'psyshock' or self.name is 'psystrike':
+            self.def_stat_used = 'def'
+
 
 def map_json_to_move(json_data):
     return Move(
@@ -89,3 +66,4 @@ def map_json_to_move(json_data):
         max_turns=json_data['max_turns'],
         stat_chance=json_data['stat_chance']
     )
+

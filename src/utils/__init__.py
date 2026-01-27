@@ -71,3 +71,86 @@ def get_type_effectiveness(move_type: str, target_type: str) -> float:
 def from_name_to_api_read(name: str) -> str:
     return name.lower().replace(" ", "-").replace(".", "").replace("'", "").replace("é", "e")
 
+stage_multipliers = {
+    -6: 2/8,
+    -5: 2/7,
+    -4: 2/6,
+    -3: 2/5,
+    -2: 2/4,
+    -1: 2/3,
+     0: 2/2,
+     1: 3/2,
+     2: 4/2,
+     3: 5/2,
+     4: 6/2,
+     5: 7/2,
+     6: 8/2
+}
+
+stage_multipliers_acc_eva = {
+    -6: 3/9,
+    -5: 3/8,
+    -4: 3/7,
+    -3: 3/6,
+    -2: 3/5,
+    -1: 3/4,
+    0: 3/3,
+    1: 4/3,
+    2: 5/3,
+    3: 6/3,
+    4: 7/3,
+    5: 8/3,
+    6: 9/3
+}
+
+MOVE_CATEGORY = [
+    'damage',
+    'ailment', # Spore, Perish Song, Toxic
+    'net-good-stats', # Swords Dance, Calm Mind
+    'heal', # Recover, Soft-Boiled
+    'damage+ailment', # Flamethrower, Poison String, porque dá damage e pode causar status
+    'swagger', # Swagger, Flatter, raise target stats + inflict status
+    'damage+lower', # moves that deal damage and lower target's stats, e.g., Psychic, Mud-slap
+    'damage+raise', # moves that deal damage and raise user's stats, e.g., Close Combat, Flame Charge
+    'damage+heal' # Giga Drain, Drain Punch
+    'ohko', # Fissure, Guillotine, Horn Drill
+    'whole-field-effect', # moves that affect the entire field, e.g., Rain Dance, Haze, trick room, grassy terrain, gravity
+    'field-effect', # moves that affect one side of the field, e.g., Stealth Rock, Light Screen, Reflect, wide guard
+    'force-switch', # Roar, Whirlwind
+    'unique' # e.g., Transform, Mimic, Sketch, Metronome, follow me
+]
+
+MOVE_TARGET_ENUM = [
+    'specific-move', # p.e. Curse, Counter
+    'selected-pokemon-me-first', # p.e. me-first, max moves
+    'ally', # p.e. Helping Hand
+    'users-field', # p.e. Reflect, Light Screen, Tailwind
+    'user-or-ally', # p.e. acupressure (only)
+    'opponents-field', # p.e. Stealth Rock, Spikes
+    'user', # p.e. Swords Dance, Recover
+    'random-opponent', # p.e. Thrash, Outrage, Struggle
+    'all-other-pokemon', # p.e. Earthquake, Surf
+    'selected-pokemon', # p.e. Shadow Ball, Flamethrower
+    'all-opponents', # p.e. Blizzard, Rock Slide
+    'entire-field', # p.e. Hail, Rain Dance, Trick Room, Grassy Terrain
+    'user-and-allies', # p.e. life-dew, howl
+    'all-pokemon',  # p.e. Perish Song
+    'all-allies', # p.e. Dragon Cheer
+    'fainting-pokemon' # p.e. Revival Blessing
+]
+
+MOVE_AILMENT_ENUM = [
+    'none',
+    'paralysis',
+    'sleep',
+    'freeze',
+    'burn',
+    'poison',
+    'badly-poison',
+    'confusion',
+    'infatuation',
+    'trap',
+    'nightmare'
+]
+
+

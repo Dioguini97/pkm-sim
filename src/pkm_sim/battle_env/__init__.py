@@ -20,13 +20,4 @@ def damage_calculation(attacker_stat: int, defender_stat: int, move_power: int, 
     random_ = random.randint(85, 100) / 100.0
     return math.floor(((((2*50/5 + 2) * move_power * (attacker_stat / defender_stat)) / 50) + 2) * targets * PB * weather * GLAIVE_RUSH * critical * random_ * stab * type_ * burn)
 
-def is_critical_hit(critical_stage: int) -> bool:
-    # Critical hit stages and their corresponding probabilities
-    critical_hit_chances = {
-        0: 1/24,  # ~4.17%
-        1: 1/8,   # 12.5%
-        2: 1/2,   # 50%
-        3: 1.0    # 100%
-    }
-    chance = critical_hit_chances.get(critical_stage, 1/24)
-    return random.random() < chance
+

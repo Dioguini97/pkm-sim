@@ -1,5 +1,4 @@
 from api.pokeAPI import PokeAPIService
-from src.entities.move import Move
 
 poke_api_service = PokeAPIService()
 

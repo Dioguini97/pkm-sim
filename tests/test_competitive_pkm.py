@@ -1,5 +1,4 @@
-import pytest
-from src.entities.competitive_pokemon import CompetitivePokemon
+from api.models import CompetitivePokemon
 
 def test_competitive_pokemon_initialization():
     ivs = {'hp': 31, 'atk': 31, 'def': 31, 'spatk': 31, 'spdef': 31, 'spd': 31}

@@ -1,7 +1,7 @@
 import requests
 
-from entities import Pokemon, Move
-from entities.ability import Ability
+from api.models import Pokemon, Move, PokemonSpecies
+from api.models import Ability
 from utils import transform_stat_name, from_name_to_api_read
 
 
@@ -11,6 +11,27 @@ class PokeAPIError(Exception):
 
 class PokeAPIService:
     BASE_URL = "https://pokeapi.co/api/v2/"
+
+    def get_pokemon_species(self, name_or_id) -> PokemonSpecies:
+        """Fetches Pokémon species data by name or ID."""
+        url = f"{self.BASE_URL}pokemon-species/{name_or_id}/"
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise PokeAPIError(f"Error fetching Pokémon species data: {response.status_code}")
+        return PokemonSpecies(
+            name=response.json()['name'],
+            id=response.json()['id'],
+            evolution_chain=self.get_evolution_chain(response.json()['evolution_chain']['url'].split('/')[-2]),
+            varieties=[variety for variety in response.json()['varieties']]
+        )
+
+    def get_evolution_chain(self, id):
+        """Fetches evolution chain data by ID."""
+        url = f'{self.BASE_URL}evolution-chain/{id}/'
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise PokeAPIError(f"Error fetching evolution chain data: {response.status_code}")
+        return response.json()
 
     def get_pokemon(self, name_or_id):
         """Fetches Pokémon data by name or ID."""
@@ -27,16 +48,15 @@ class PokeAPIService:
             weight=response.json()['weight'],
             move_list=[m['move']['name'] for m in response.json()['moves']],
             base_stats={transform_stat_name(stat['stat']['name']): stat['base_stat'] for stat in response.json()['stats']},
-            img_url=response.json()['sprites']['front_default']
+            img_url=response.json()['sprites']['front_default'],
+            evolution_chain=None,
+            varieties=None,
+            crie_url=response.json()['cries']['latest']
         )
         return pokemon
 
     def get_ability(self, name_or_id):
         """Fetches ability data by name or ID."""
-        pass
-
-    def get_type(self, name_or_id):
-        """Fetches type data by name or ID."""
         pass
 
     def get_move(self, name_or_id):

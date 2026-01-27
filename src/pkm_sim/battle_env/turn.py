@@ -1,17 +1,22 @@
-from pkm_sim.battle_env.field import Field
-from pkm_sim.battle_env.pokemon import BattlePokemon
-from entities import Move
+from __future__ import annotations
+from pkm_sim.battle_env.entities.field import Field
+from pkm_sim.battle_env.entities.pokemon import BattlePokemon
+from pkm_sim.battle_env.entities.move import BattleMove
 
 
 class Action:
-    def __init__(self,user: BattlePokemon, move: Move|None, switch: BattlePokemon|None, transformation: str|None):
+    def __init__(self, player: int, user: BattlePokemon | None, battle_move: BattleMove | None, switch: BattlePokemon | None, transformation: str | None, action_type: str, target: int | None):
         self.user = user
-        self.move = move
+        self.player = player
+        self.action_type = action_type
+        self.battle_move = battle_move  # Agora é BattleMove em vez de Move
         self.switch = switch
         self.transformation = transformation # Tera, Mega, Dynamax, etc.
+        self.target = target # Target index in case of multi-target moves (0, 1)
 
     def __repr__(self):
-        return f"Action(User: {self.user.pokemon.name}, Move: {self.move.name})"
+        move_name = self.battle_move.move.name if self.battle_move else "None"
+        return f"Action(Player: {self.player}, User: {self.user.pokemon.name if self.user else 'None'}, Move: {move_name})"
 
 
 class Turn:
@@ -20,34 +25,127 @@ class Turn:
         self.actions = actions
         self.field_state = field_state
 
-
     def __repr__(self):
         return f"Turn({self.turn_number}, Actions: {self.actions})"
 
-    def order_actions(self):
+    def __str__(self):
+        return f"Turn {self.turn_number} with actions: {self.actions}"
+
+    def order_actions_for_moves(self) -> list[Action]:
+        """Ordena ações de move por prioridade e velocidade."""
+        move_actions = [action for action in self.actions if action.battle_move is not None]
         return sorted(
-            self.actions,
+            move_actions,
             key=lambda action: (
-                action.move.priority,
+                action.battle_move.move.priority,
                 action.user.pokemon.base_stats['spd']
             ),
             reverse=True
         )
 
-    def execute_turn(self):
+    def execute_turn(self) -> dict:
+        """
+        Executa um turno completo com todas as 5 fases.
+        Retorna dicionário com resultado do turno.
+        """
+        results = {
+            'turn_number': self.turn_number,
+            'switches': [],
+            'transformations': [],
+            'moves': [],
+            'fainting': [],
+            'end_of_turn_effects': []
+        }
 
-        # Switch Phase
-        ordered_switches = [(action.user, action.switch) for action in self.actions if action.switch is not None]
-        for user, switch in ordered_switches:
-            pass
-        # Transformation Phase TODO later
-        # Move Phase
-        # Field/Status Effects Phase
+        # Phase 1: Switch Phase (ordenado por velocidade)
+        self._execute_switch_phase(results)
 
-        ordered_actions = self.order_actions()
-        results = []
-        for action in ordered_actions:
-            result = action.user.attack(target=action.user, move=action.move)  # Simplified: user attacks itself
-            results.append(result)
+        # Phase 2: Transformation Phase (ordenado por velocidade)
+        self._execute_transformation_phase(results)
+
+        # Phase 3: Move Phase (ordenado por prioridade e velocidade)
+        self._execute_move_phase(results)
+
+        # Phase 4: Fainting Phase (remover Pokémon desmaiados em ordem de velocidade)
+        self._execute_fainting_phase(results)
+
+        # Phase 5: End-of-Turn Effects Phase (aplicar efeitos finais do turno)
+        self._execute_end_of_turn_phase(results)
+
         return results
 
+    def _execute_switch_phase(self, results: dict):
+        """Phase 1: Executa trocas de Pokémon em ordem de velocidade."""
+        switch_actions = [action for action in self.actions if action.switch is not None]
+        switch_actions.sort(key=lambda x: x.user.pokemon.base_stats['spd'], reverse=True)
+
+        for action in switch_actions:
+            old_pokemon = action.user.pokemon.name
+            new_pokemon = action.switch.pokemon.name
+            message = f"{old_pokemon} is switching to {new_pokemon}!"
+            print(message)
+            results['switches'].append(message)
+            # TODO: Aplicar lógica de troca real no field
+
+    def _execute_transformation_phase(self, results: dict):
+        """Phase 2: Executa transformações em ordem de velocidade."""
+        transform_actions = [action for action in self.actions if action.transformation is not None]
+        transform_actions.sort(key=lambda x: x.user.pokemon.base_stats['spd'], reverse=True)
+
+        for action in transform_actions:
+            message = f"{action.user.pokemon.name} is transforming into {action.transformation}!"
+            print(message)
+            results['transformations'].append(message)
+            # TODO: Aplicar lógica de transformação
+
+    def _execute_move_phase(self, results: dict):
+        """Phase 3: Executa moves em ordem de prioridade e velocidade."""
+        ordered_move_actions = self.order_actions_for_moves()
+
+        for action in ordered_move_actions:
+            if action.battle_move is None:
+                continue
+
+            # TODO: Determinar alvo correto baseado em action.target
+            # Por agora, assumir alvo é o adversário
+            opponent_side = 1 - action.user.pokemon.base_stats.get('side', 0)
+            target = self.field_state.slot_pkm[opponent_side][0]  # TODO: melhorar lógica de target
+
+            if target is None:
+                continue
+
+            # Executar o move
+            result = action.battle_move.execute(action.user, target, self.field_state)
+            print(result['message'])
+            results['moves'].append(result)
+
+    def _execute_fainting_phase(self, results: dict):
+        """Phase 4: Remove Pokémon desmaiados em ordem de velocidade."""
+        fainted_pokemon = []
+
+        # Encontrar Pokémon desmaiados
+        for side_index in range(2):
+            for slot_index in range(len(self.field_state.slot_pkm[side_index])):
+                pokemon = self.field_state.slot_pkm[side_index][slot_index]
+                if pokemon and pokemon.is_fainted():
+                    fainted_pokemon.append((pokemon, side_index, slot_index))
+
+        # Ordenar por velocidade (decrescente)
+        fainted_pokemon.sort(
+            key=lambda x: x[0].pokemon.base_stats['spd'],
+            reverse=True
+        )
+
+        # Remover Pokémon desmaiados
+        for pokemon, side, slot in fainted_pokemon:
+            message = f"{pokemon.pokemon.name} fainted!"
+            print(message)
+            results['fainting'].append(message)
+            self.field_state.slot_pkm[side][slot] = None
+            # TODO: Chamar método para desativar ability
+
+    def _execute_end_of_turn_phase(self, results: dict):
+        """Phase 5: Aplica efeitos de final de turno (weather, terrain, status)."""
+        # TODO: Implementar lógica de end-of-turn effects
+        # weather damage, terrain damage, status damage, etc.
+        pass
