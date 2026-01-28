@@ -3,7 +3,7 @@ from pathlib import Path
 
 from api.pokeAPI import PokeAPIService
 from api.models import Pokemon, Move
-from api.models import map_json_to_move
+from api.models.move import map_json_to_move
 from api.models.pokemon import map_json_to_pkm, PokemonSpecies, map_json_to_pkm_sp
 
 poke_api_service = PokeAPIService()
@@ -91,12 +91,12 @@ class Cache:
     def add_pokemon_to_cache(self, pokemon: Pokemon):
         species = self.get_pokemon_species_from_cache(pokemon.name.split('-')[0])
         pokemon.varieties = species.varieties
-        pokemon.evolution_chain_id = species.evolution_chain_id
+        pokemon.evolution_chain = species.evolution_chain
         if not self.is_pokemon_in_cache(pokemon.name):
             file_path = self.CACHE_DIR / "pokemon"/ f"{pokemon.name}.json"
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w', encoding="utf-8") as file:
-                json.dump(pokemon.__dict__, file, ensure_ascii=False)
+                json.dump(pokemon.__dict__, file, ensure_ascii=False, indent=4)
         else:
             pass
 
@@ -105,18 +105,16 @@ class Cache:
             file_path = self.CACHE_DIR / "move"/ f"{move.name}.json"
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w', encoding="utf-8") as file:
-                json.dump(move.__dict__, file, ensure_ascii=False)
+                json.dump(move.__dict__, file, ensure_ascii=False, indent=4)
         else:
             pass
 
     def add_pokemon_species_to_cache(self, pokemon_species: PokemonSpecies):
         if not self.is_pokemon_species_in_cache(pokemon_species.name):
-            evo_chain = self.get_evolution_chain_from_cache(pokemon_species.evolution_chain_id)
-            pokemon_species.does_it_evolve = self.can_evolve(pokemon_species, evo_chain)
             file_path = self.CACHE_DIR / "pokemon-species"/ f"{pokemon_species.name}.json"
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w', encoding="utf-8") as file:
-                json.dump(pokemon_species.__dict__, file, ensure_ascii=False)
+                json.dump(pokemon_species.__dict__, file, ensure_ascii=False, indent=4)
         else:
             pass
 
@@ -137,7 +135,7 @@ class Cache:
             file_path = self.CACHE_DIR / "evolution-chain"/ f"{id}.json"
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w', encoding="utf-8") as file:
-                json.dump(evo_chain, file, ensure_ascii=False)
+                json.dump(evo_chain, file, ensure_ascii=False, indent=4)
         else:
             pass
 

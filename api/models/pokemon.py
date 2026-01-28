@@ -1,9 +1,8 @@
 class PokemonSpecies:
-    def __init__(self, id: int, name: str, evolution_chain, varieties: list=None):
+    def __init__(self, id: int, name: str, evolution_chain=None, varieties: list=None):
         self.id = id
         self.name = name
         self.evolution_chain = evolution_chain
-        self.does_it_evolve = self.can_evolve(self.evolution_chain)
         self.varieties = varieties
 
     def can_evolve(self, evo_chain) -> bool:
@@ -23,8 +22,8 @@ class PokemonSpecies:
             return False
 
 class Pokemon(PokemonSpecies):
-    def __init__(self, id: int, name: str, evolution_chain, varieties: list|None, types: list, base_stats: dict,
-                 abilities: list, height: float, weight: float, move_list: list, img_url: str, crie_url: str):
+    def __init__(self, id: int, name: str, types: list, base_stats: dict, abilities: list, height: float, weight: float,
+                 move_list: list, img_url: str, crie_url: str, evolution_chain=None, varieties: list = None):
         super().__init__(id, name, evolution_chain, varieties)
         self.types = types
         self.base_stats = base_stats
@@ -34,6 +33,7 @@ class Pokemon(PokemonSpecies):
         self.move_list = move_list
         self.img_url = img_url
         self.crie_url = crie_url
+        self.does_it_evolve = self.can_evolve(self.evolution_chain)
 
     def __str__(self):
         return f"{self.name} (ID: {self.id}) - Types: {', '.join(self.types)}\n" \
@@ -44,18 +44,18 @@ class Pokemon(PokemonSpecies):
 
 def map_json_to_pkm(json_data):
     return Pokemon(
-        name = json_data['name'], types = json_data['types'], id = json_data['id'],
-        base_stats = json_data['base_stats'], abilities = json_data['abilities'],
+        id = json_data['id'], name = json_data['name'],
+        types = json_data['types'], base_stats = json_data['base_stats'], abilities = json_data['abilities'],
         height = json_data['height'], weight = json_data['weight'], move_list = json_data['move_list'],
-        img_url = json_data['img_url'], evolution_chain_id=json_data['evolution_chain_id'],
-        varieties=json_data['varieties']
+        img_url = json_data['img_url'], crie_url=json_data['crie_url'], varieties=json_data['varieties'],
+        evolution_chain=json_data['evolution_chain']
     )
 
 def map_json_to_pkm_sp(json) -> PokemonSpecies:
     pkm = PokemonSpecies(
         name=json['name'],
         id=json['id'],
-        evolution_chain_id=json['evolution_chain_id'],
+        evolution_chain=json['evolution_chain'],
         varieties=json['varieties']
     )
     pkm.does_it_evolve = json['does_it_evolve']

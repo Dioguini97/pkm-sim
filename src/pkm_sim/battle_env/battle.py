@@ -39,9 +39,7 @@ class Battle:
             terrain=None,
             gravity=False,
             trick_room=False,
-            side_conditions=[None, None],
-            slot_pkm=[[self.teams[0][0], self.teams[0][1]], [self.teams[1][0], self.teams[1][1]]],
-            bench_pkm=[[self.teams[0][3], self.teams[0][2]], [self.teams[1][2], self.teams[1][3]]]
+            side_conditions=[None, None]
         )
         self.field = field
 

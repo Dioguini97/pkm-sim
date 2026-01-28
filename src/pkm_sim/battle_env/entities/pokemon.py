@@ -1,34 +1,35 @@
 import math
 import random
 
-from data import Cache
-from api.models import CompetitivePokemon, Move
-from pkm_sim.battle_env.entities.ailment import Ailment, BadlyPoison, Burn
+from api.models import Move
 from pkm_sim.battle_env.entities.move import BattleMove
 from pkm_sim.battle_env.entities.status import Status, Effect
+from pkm_sim.pokemon_builder.competitive_pokemon import CompetitivePokemon
 from utils import from_name_to_api_read, stage_multipliers
+from data import Cache
 
 CACHE = Cache()
+
 
 class BattlePokemon:
     def __init__(self, pokemon: CompetitivePokemon):
         self.pokemon = pokemon
         self.hp_total = pokemon.raw_stats['hp']
-        self.status = None
+        self.status: Status|None = None
         self.effects = []
         self.stats = {
             'atk': pokemon.raw_stats['atk'],
             'def': pokemon.raw_stats['def'],
-            'spatk': pokemon.raw_stats['spatk'],
-            'spdef': pokemon.raw_stats['spdef'],
-            'spd': pokemon.raw_stats['spd']
+            'spa': pokemon.raw_stats['spa'],
+            'spd': pokemon.raw_stats['spd'],
+            'spe': pokemon.raw_stats['spe']
         }
         self.stat_stages = {
             'atk': 0,
             'def': 0,
-            'spatk': 0,
-            'spdef': 0,
+            'spa': 0,
             'spd': 0,
+            'spe': 0,
             'acc': 0,
             'eva': 0,
             'crit': 0
@@ -75,7 +76,7 @@ class BattlePokemon:
             self.stats[stat] = self.pokemon.raw_stats[stat]
 
     def __str__(self):
-        return f"{self.pokemon.name} - HP: {self.current_hp}/{self.hp_total} - Status: {self.status_conditions if self.status_conditions else 'Healthy'}"
+        return f"{self.pokemon.name} - HP: {self.current_hp}/{self.hp_total} - Status: {self.status if self.status else 'Healthy'}"
 
     def apply_stat_stage(self, stat_name: str, stages: int):
         """Aplica mudança de stat ao Pokémon."""
@@ -115,12 +116,13 @@ class BattlePokemon:
         return True if self.status is not None else False
 
     def get_higher_atk_stat(self):
-        """Retorna a stat de ataque mais alta (atk ou spatk)"""
+        """Retorna a stat de ataque mais alta (atk ou spa)"""
         atk = self.get_stat('atk')
-        spatk = self.get_stat('spatk')
-        if atk > spatk:
+        spa = self.get_stat('spa')
+        if atk > spa:
             return 'atk'
-        elif atk < spatk:
-            return 'spatk'
+        elif atk < spa:
+            return 'spa'
         else:
-            return random.choice(['atk', 'spatk'])
+            return random.choice(['atk', 'spa'])
+

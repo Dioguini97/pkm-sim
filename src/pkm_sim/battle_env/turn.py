@@ -1,18 +1,19 @@
 from __future__ import annotations
-from pkm_sim.battle_env.entities.field import Field
+from pkm_sim.battle_env.entities.field import Field, BattleSlot
 from pkm_sim.battle_env.entities.pokemon import BattlePokemon
 from pkm_sim.battle_env.entities.move import BattleMove
 
 
 class Action:
-    def __init__(self, player: int, user: BattlePokemon | None, battle_move: BattleMove | None, switch: BattlePokemon | None, transformation: str | None, action_type: str, target: int | None):
-        self.user = user
-        self.player = player
+    def __init__(self, user_slot: BattleSlot | None, action_type: str,
+                 battle_move: BattleMove | None = None, target_slot: list[BattleSlot] | None = None,
+                 switch_in: BattlePokemon | None = None, transformation: str | None = None):
+        self.user_slot = user_slot
         self.action_type = action_type
         self.battle_move = battle_move  # Agora é BattleMove em vez de Move
-        self.switch = switch
+        self.target_slot = target_slot
         self.transformation = transformation # Tera, Mega, Dynamax, etc.
-        self.target = target # Target index in case of multi-target moves (0, 1)
+        self.switch_in = switch_in # Target index in case of multi-target moves (0, 1)
 
     def __repr__(self):
         move_name = self.battle_move.move.name if self.battle_move else "None"
@@ -38,8 +39,16 @@ class Turn:
             move_actions,
             key=lambda action: (
                 action.battle_move.move.priority,
-                action.user.pokemon.base_stats['spd']
+                action.user_slot.pokemon.stats['spe']
             ),
+            reverse=True
+        )
+
+    def order_actions_for_switch(self) -> list[Action]:
+        switch_actions = [action for action in self.actions if action.action_type == "switch"]
+        return sorted(
+            switch_actions,
+            key=lambda action: (action.user_slot.pokemon.stats['spe']),
             reverse=True
         )
 
@@ -61,31 +70,26 @@ class Turn:
         self._execute_switch_phase(results)
 
         # Phase 2: Transformation Phase (ordenado por velocidade)
-        self._execute_transformation_phase(results)
+        #self._execute_transformation_phase(results)
 
         # Phase 3: Move Phase (ordenado por prioridade e velocidade)
         self._execute_move_phase(results)
 
         # Phase 4: Fainting Phase (remover Pokémon desmaiados em ordem de velocidade)
-        self._execute_fainting_phase(results)
+        #self._execute_fainting_phase(results)
 
         # Phase 5: End-of-Turn Effects Phase (aplicar efeitos finais do turno)
-        self._execute_end_of_turn_phase(results)
+        #self._execute_end_of_turn_phase(results)
 
         return results
 
     def _execute_switch_phase(self, results: dict):
         """Phase 1: Executa trocas de Pokémon em ordem de velocidade."""
-        switch_actions = [action for action in self.actions if action.switch is not None]
-        switch_actions.sort(key=lambda x: x.user.pokemon.base_stats['spd'], reverse=True)
+        switch_actions = self.order_actions_for_switch()
 
         for action in switch_actions:
-            old_pokemon = action.user.pokemon.name
-            new_pokemon = action.switch.pokemon.name
-            message = f"{old_pokemon} is switching to {new_pokemon}!"
-            print(message)
-            results['switches'].append(message)
-            # TODO: Aplicar lógica de troca real no field
+            self.field_state.switch(action.user_slot, action.switch_in)
+            #results['switches'].append(message)
 
     def _execute_transformation_phase(self, results: dict):
         """Phase 2: Executa transformações em ordem de velocidade."""
@@ -108,16 +112,7 @@ class Turn:
 
             # TODO: Determinar alvo correto baseado em action.target
             # Por agora, assumir alvo é o adversário
-            opponent_side = 1 - action.user.pokemon.base_stats.get('side', 0)
-            target = self.field_state.slot_pkm[opponent_side][0]  # TODO: melhorar lógica de target
-
-            if target is None:
-                continue
-
-            # Executar o move
-            result = action.battle_move.execute(action.user, target, self.field_state)
-            print(result['message'])
-            results['moves'].append(result)
+            self._execute_move(action)
 
     def _execute_fainting_phase(self, results: dict):
         """Phase 4: Remove Pokémon desmaiados em ordem de velocidade."""
@@ -125,7 +120,7 @@ class Turn:
 
         # Encontrar Pokémon desmaiados
         for side_index in range(2):
-            for slot_index in range(len(self.field_state.slot_pkm[side_index])):
+            for slot_index in range(len(self.field_state.slots[side_index])):
                 pokemon = self.field_state.slot_pkm[side_index][slot_index]
                 if pokemon and pokemon.is_fainted():
                     fainted_pokemon.append((pokemon, side_index, slot_index))
@@ -149,3 +144,16 @@ class Turn:
         # TODO: Implementar lógica de end-of-turn effects
         # weather damage, terrain damage, status damage, etc.
         pass
+
+    def _execute_move(self, action: Action):
+        move = action.battle_move
+        user = action.user_slot.pokemon
+
+        move.consume_pp()
+
+        for target in action.target_slot:
+            if target.is_empty():
+                continue
+            if move.move.damage_class != 'status':
+                damage = move._calculate_damage(user, target.pokemon)
+                target.pokemon.apply_damage(damage)

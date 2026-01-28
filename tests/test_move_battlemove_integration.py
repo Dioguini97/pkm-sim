@@ -3,9 +3,10 @@ Teste básico para validar a arquitetura Move/BattleMove
 """
 import pytest
 from unittest.mock import MagicMock
-from api.models import Move, CompetitivePokemon
+from api.models import Move
 from pkm_sim.battle_env.entities.move import BattleMove
 from pkm_sim.battle_env.entities.pokemon import BattlePokemon
+from pkm_sim.pokemon_builder.competitive_pokemon import CompetitivePokemon
 
 
 class TestBattleMove:

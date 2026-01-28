@@ -1,10 +1,12 @@
 from __future__ import annotations
 import math
 import random
+from calendar import day_abbr
+
 from api.models import Move
 from pkm_sim.battle_env import damage_calculation
-from pkm_sim.battle_env.entities.field import Field
-from utils import get_type_effectiveness, stage_multipliers_acc_eva
+from pkm_sim.battle_env.entities.status import Status
+from utils import get_type_effectiveness, stage_multipliers_acc_eva, MoveTarget
 
 
 class BattleMove:
@@ -48,9 +50,9 @@ class BattleMove:
 
     def get_atk_stat_used(self):
         """Retorna a stat usada para ataque do move."""
-        if self.move.damage_class is 'special':
-            return 'spatk'
-        elif self.move.damage_class is 'physical':
+        if self.move.damage_class == 'special':
+            return 'spa'
+        elif self.move.damage_class == 'physical':
             if self.move.name in ['body-press']:
                 return 'def'
             return 'atk'
@@ -59,11 +61,11 @@ class BattleMove:
 
     def get_def_stat_used(self):
         """Retorna a stat usada para defesa do move."""
-        if self.move.damage_class is 'special':
+        if self.move.damage_class == 'special':
             if self.move.name in ['psyshock', 'psystrike']:
                 return 'def'
-            return 'spdef'
-        elif self.move.damage_class is 'physical':
+            return 'spd'
+        elif self.move.damage_class == 'physical':
             return 'def'
         else:
             return None
@@ -114,54 +116,60 @@ class BattleMove:
     #     # Verificar hit
     #     return random.randint(1, 100) <= math.floor(modified_accuracy)
     #
-    # def _calculate_damage(self, user, target) -> int:
-    #     """Calcula o dano do move."""
-    #     # Se move não tem poder, retorna 0 (move de status ou sem efeito de dano)
-    #     if self.move.power is None or self.move.power == 0:
-    #         return 0
-    #
-    #     critical_hit = self._is_critical_hit(user.crit_stage + self.move.crit_rate)
-    #
-    #     if critical_hit:
-    #         attacker_stat = max(user.stats[self.move.atk_stat_used], user.pokemon.base_stats[self.move.atk_stat_used])
-    #         defender_stat = min(target.stats[self.move.def_stat_used], target.pokemon.base_stats[self.move.def_stat_used])
-    #     else:
-    #         attacker_stat = user.stats[self.move.atk_stat_used]
-    #         defender_stat = target.stats[self.move.def_stat_used]
-    #
-    #     # Verficar se é Physical e se está burned
-    #     burn = 1
-    #     if self.move.damage_class == 'physical' and user.status_conditions == 'burn':
-    #         burn = 0.5
-    #
-    #     # Calcular multiplicadores
-    #     target_multiplier = 1 if self.move.target == 'selected-pokemon' else 0.75
-    #
-    #     stab = 1.5 if self.move.move_type in user.pokemon.types else 1.0
-    #
-    #     # Type effectiveness
-    #     type_multiplier = 1.0
-    #     for target_type in target.pokemon.types:
-    #         type_multiplier *= get_type_effectiveness(self.move.move_type, target_type)
-    #
-    #     # Aplicar cálculo de dano
-    #     damage = damage_calculation(
-    #         attacker_stat=attacker_stat,
-    #         defender_stat=defender_stat,
-    #         move_power=self.move.power,
-    #         targets=target_multiplier,
-    #         PB=1,
-    #         weather=1,
-    #         GLAIVE_RUSH=1,
-    #         critical_hit=critical_hit,
-    #         stab=stab,
-    #         type_=type_multiplier,
-    #         burn=burn,
-    #         other=1,
-    #         z_move=1
-    #     )
-    #
-    #     return max(0, damage)
+
+    def _calculate_damage(self, user, target) -> int:
+        """Calcula o dano do move."""
+        # Se move não tem poder, retorna 0 (move de status ou sem efeito de dano)
+        move_power = self.calculate_power()
+
+        critical_hit = self._is_critical_hit(user.stat_stages['crit'] + self.move.crit_rate)
+
+        if critical_hit:
+            attacker_stat = max(user.stats[self.get_atk_stat_used()], user.pokemon.raw_stats[self.get_atk_stat_used()])
+            defender_stat = min(target.stats[self.get_def_stat_used()], target.pokemon.raw_stats[self.get_def_stat_used()])
+        else:
+            attacker_stat = user.stats[self.get_atk_stat_used()]
+            defender_stat = target.stats[self.get_def_stat_used()]
+
+        # Verficar se é Physical e se está burned
+        burn = 1
+        if self.move.damage_class == 'physical' and user.status == Status.BURN:
+            burn = 0.5
+
+        # Calcular multiplicadores
+        target_multiplier = 0.75 if self.move.target in [MoveTarget.ALL_OPPONENTS.value, MoveTarget.ALL_OTHER_POKEMON.value, MoveTarget.ALL_POKEMON.value] else 1
+
+        stab = 1.5 if self.move.move_type in user.pokemon.pkm.types else 1.0
+
+        # Type effectiveness
+        type_multiplier = 1.0
+        for target_type in target.pokemon.pkm.types:
+            type_multiplier *= get_type_effectiveness(self.move.move_type, target_type)
+
+        # Aplicar cálculo de dano
+        damage = damage_calculation(
+            attacker_stat=attacker_stat,
+            defender_stat=defender_stat,
+            move_power=move_power,
+            targets=target_multiplier,
+            PB=1,
+            weather=1,
+            GLAIVE_RUSH=1,
+            critical_hit=critical_hit,
+            stab=stab,
+            type_=type_multiplier,
+            burn=burn,
+            other=1,
+            z_move=1
+        )
+
+        print(f'The {user.pokemon.name} used {self.move.name} on {target.pokemon.name}')
+        print(f'Used is {attacker_stat} in target\'s {defender_stat} with {move_power} power and a target multiplier of {target_multiplier}.')
+        print(f'Critical? {critical_hit} with {stab} stab power and {type_multiplier} effectiveness')
+        print(f'Did {damage} damage')
+
+
+        return max(1, damage)
     #
     # def _apply_ailment(self):
     #     pass
@@ -217,14 +225,14 @@ class BattleMove:
     #     self.consume_pp()
     #     return result
     #
-    # def _is_critical_hit(self, critical_stage: int) -> bool:
-    #     # Critical hit stages and their corresponding probabilities
-    #     critical_hit_chances = {
-    #         -1: 0,
-    #         0: 1 / 24,  # ~4.17%
-    #         1: 1 / 8,  # 12.5%
-    #         2: 1 / 2,  # 50%
-    #         3: 1.0  # 100%
-    #     }
-    #     chance = critical_hit_chances.get(critical_stage, 1 / 24)
-    #     return random.random() < chance
+    def _is_critical_hit(self, critical_stage: int) -> bool:
+        # Critical hit stages and their corresponding probabilities
+        critical_hit_chances = {
+            -1: 0,
+            0: 1 / 24,  # ~4.17%
+            1: 1 / 8,  # 12.5%
+            2: 1 / 2,  # 50%
+            3: 1.0  # 100%
+        }
+        chance = critical_hit_chances.get(critical_stage, 1 / 24)
+        return random.random() < chance

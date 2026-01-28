@@ -1,17 +1,16 @@
 import math
-from typing import Optional
-
-from api.models.pokemon import Pokemon
 from utils import natures
+from data import Cache
 
-class CompetitivePokemon(Pokemon):
-    def __init__(self, id: int, name: str, evolution_chain_id: Optional[int], varieties: Optional[list], types: list, base_stats: dict,
-                 abilities: list, height: float, weight: float, move_list: list, img_url: str,
-                 ability: str, item: str, nature: str, ivs: dict, evs: dict, moves: list, level: int = 50):
-        super().__init__(id=id, types=types, name=name, base_stats=base_stats, abilities=abilities,
-                         height=height, weight=weight, move_list=move_list, img_url=img_url,
-                         evolution_chain_id=evolution_chain_id, varieties=varieties
-                         )
+CACHE = Cache()
+
+class CompetitivePokemon:
+    def __init__(self, name: str, ability: str, nature: str, moves: list,
+                 ivs: dict=None, evs: dict=None, item: str=None, level: int = 50,nickname: str=None):
+        self.name = name
+        self.nickname = nickname
+        if nickname is None:
+            self.nickname = self.name
         self.ability = ability
         self.item = item
         self.nature = nature.upper()
@@ -20,7 +19,13 @@ class CompetitivePokemon(Pokemon):
         self.ivs = ivs  # Individual Values as a dictionary
         self.level = level
         self.raw_stats = {}
+        if ivs is None:
+            self.ivs = {'hp': 31, 'atk': 31, 'def': 31, 'spa': 31, 'spd': 31, 'spe': 31}
+        if evs is None:
+            self.evs = {'hp': 0, 'atk': 0, 'def': 0, 'spa': 0, 'spd': 0, 'spe': 0}
+        self.pkm = CACHE.get_pokemon_from_cache(self.name)
         self.calculate_all_stats()
+
 
     def calculate_stat(self, base: int, iv: int, ev: int, level: int, nature_modifier: float) -> int:
         """Calculate a stat based on the formula used in Pokémon games."""
@@ -33,13 +38,14 @@ class CompetitivePokemon(Pokemon):
         return hp
 
     def calculate_all_stats(self):
-        self.raw_stats['hp'] = self.calculate_hp(self.base_stats['hp'], self.ivs.get('hp'), self.evs.get('hp'), self.level)
-        self.raw_stats['atk'] = self.calculate_stat(self.base_stats['atk'], self.ivs.get('atk'), self.evs.get('atk'), self.level, natures[self.nature]['atk'])
-        self.raw_stats['def'] = self.calculate_stat(self.base_stats['def'], self.ivs.get('def'), self.evs.get('def'), self.level, natures[self.nature]['def'])
-        self.raw_stats['spatk'] = self.calculate_stat(self.base_stats['spatk'], self.ivs.get('spatk'), self.evs.get('spatk'), self.level, natures[self.nature]['spatk'])
-        self.raw_stats['spdef'] = self.calculate_stat(self.base_stats['spdef'], self.ivs.get('spdef'), self.evs.get('spdef'), self.level, natures[self.nature]['spdef'])
-        self.raw_stats['spd'] = self.calculate_stat(self.base_stats['spd'], self.ivs.get('spd'), self.evs.get('spd'), self.level, natures[self.nature]['spd'])
+        self.raw_stats['hp'] = self.calculate_hp(self.pkm.base_stats['hp'], self.ivs.get('hp'), self.evs.get('hp'), self.level)
+        self.raw_stats['atk'] = self.calculate_stat(self.pkm.base_stats['atk'], self.ivs.get('atk'), self.evs.get('atk'), self.level, natures[self.nature]['atk'])
+        self.raw_stats['def'] = self.calculate_stat(self.pkm.base_stats['def'], self.ivs.get('def'), self.evs.get('def'), self.level, natures[self.nature]['def'])
+        self.raw_stats['spa'] = self.calculate_stat(self.pkm.base_stats['spa'], self.ivs.get('spa'), self.evs.get('spa'), self.level, natures[self.nature]['spa'])
+        self.raw_stats['spd'] = self.calculate_stat(self.pkm.base_stats['spd'], self.ivs.get('spd'), self.evs.get('spd'), self.level, natures[self.nature]['spd'])
+        self.raw_stats['spe'] = self.calculate_stat(self.pkm.base_stats['spe'], self.ivs.get('spe'), self.evs.get('spe'), self.level, natures[self.nature]['spe'])
 
     def __str__(self):
         return f"{self.name} (Level {self.level}) - Nature: {self.nature}, Ability: {self.ability}, Item: {self.item}\n" \
                f"Stats: HP: {self.base_stats}\n"
+

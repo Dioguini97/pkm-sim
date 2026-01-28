@@ -1,29 +1,31 @@
+from enum import Enum
+
 natures = {
-    "HARDY": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1},
-    "LONELY": {"atk": 1.1, "def": 0.9, "spatk": 1, "spdef": 1, "spd": 1},
-    "BRAVE": {"atk": 1.1, "def": 1, "spatk": 1, "spdef": 1, "spd": 0.9},
-    "ADAMANT": {"atk": 1.1, "def": 1, "spatk": 0.9, "spdef": 1, "spd": 1},
-    "NAUGHTY": {"atk": 1.1, "def": 1, "spatk": 1, "spdef": 0.9, "spd": 1},
-    "BOLD": {"atk": 0.9, "def": 1.1, "spatk": 1, "spdef": 1, "spd": 1},
-    "DOCILE": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1},
-    "RELAXED": {"atk": 1, "def": 1.1, "spatk": 1, "spdef": 1, "spd": 0.9},
-    "IMPISH": {"atk": 1, "def": 1.1, "spatk": 0.9, "spdef": 1, "spd": 1},
-    "LAX": {"atk": 1, "def": 1.1, "spatk": 1, "spdef": 0.9, "spd": 1},
-    "TIMID": {"atk": 0.9, "def": 1, "spatk": 1, "spdef": 1, "spd": 1.1},
-    "HASTY": {"atk": 1, "def": 0.9, "spatk": 1, "spdef": 1, "spd": 1.1},
-    "SERIOUS": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1},
-    "JOLLY": {"atk": 1, "def": 1, "spatk": 0.9, "spdef": 1, "spd": 1.1},
-    "NAIVE": {"atk": 1, "def": 1, "spatk": 1, "spdef": 0.9, "spd": 1.1},
-    "MODEST": {"atk": 0.9, "def": 1, "spatk": 1.1, "spdef": 1, "spd": 1},
-    "MILD": {"atk": 1, "def": 0.9, "spatk": 1.1, "spdef": 1, "spd": 1},
-    "QUIET": {"atk": 1, "def": 1, "spatk": 1.1, "spdef": 1, "spd": 0.9},
-    "BASHFUL": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1},
-    "RASH": {"atk": 1, "def": 1, "spatk": 1.1, "spdef": 0.9, "spd": 1},
-    "CALM": {"atk": 0.9, "def": 1, "spatk": 1, "spdef": 1.1, "spd": 1},
-    "GENTLE": {"atk": 1, "def": 0.9, "spatk": 1, "spdef": 1.1, "spd": 1},
-    "SASSY": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1.1, "spd": 0.9},
-    "CAREFUL": {"atk": 1, "def": 1, "spatk": 0.9, "spdef": 1.1, "spd": 1},
-    "QUIRKY": {"atk": 1, "def": 1, "spatk": 1, "spdef": 1, "spd": 1}
+    "HARDY": {"atk": 1, "def": 1, "spa": 1, "spd": 1, "spe": 1},
+    "LONELY": {"atk": 1.1, "def": 0.9, "spa": 1, "spd": 1, "spe": 1},
+    "BRAVE": {"atk": 1.1, "def": 1, "spa": 1, "spd": 1, "spe": 0.9},
+    "ADAMANT": {"atk": 1.1, "def": 1, "spa": 0.9, "spd": 1, "spe": 1},
+    "NAUGHTY": {"atk": 1.1, "def": 1, "spa": 1, "spd": 0.9, "spe": 1},
+    "BOLD": {"atk": 0.9, "def": 1.1, "spa": 1, "spd": 1, "spe": 1},
+    "DOCILE": {"atk": 1, "def": 1, "spa": 1, "spd": 1, "spe": 1},
+    "RELAXED": {"atk": 1, "def": 1.1, "spa": 1, "spd": 1, "spe": 0.9},
+    "IMPISH": {"atk": 1, "def": 1.1, "spa": 0.9, "spd": 1, "spe": 1},
+    "LAX": {"atk": 1, "def": 1.1, "spa": 1, "spd": 0.9, "spe": 1},
+    "TIMID": {"atk": 0.9, "def": 1, "spa": 1, "spd": 1, "spe": 1.1},
+    "HASTY": {"atk": 1, "def": 0.9, "spa": 1, "spd": 1, "spe": 1.1},
+    "SERIOUS": {"atk": 1, "def": 1, "spa": 1, "spd": 1, "spe": 1},
+    "JOLLY": {"atk": 1, "def": 1, "spa": 0.9, "spd": 1, "spe": 1.1},
+    "NAIVE": {"atk": 1, "def": 1, "spa": 1, "spd": 0.9, "spe": 1.1},
+    "MODEST": {"atk": 0.9, "def": 1, "spa": 1.1, "spd": 1, "spe": 1},
+    "MILD": {"atk": 1, "def": 0.9, "spa": 1.1, "spd": 1, "spe": 1},
+    "QUIET": {"atk": 1, "def": 1, "spa": 1.1, "spd": 1, "spe": 0.9},
+    "BASHFUL": {"atk": 1, "def": 1, "spa": 1, "spd": 1, "spe": 1},
+    "RASH": {"atk": 1, "def": 1, "spa": 1.1, "spd": 0.9, "spe": 1},
+    "CALM": {"atk": 0.9, "def": 1, "spa": 1, "spd": 1.1, "spe": 1},
+    "GENTLE": {"atk": 1, "def": 0.9, "spa": 1, "spd": 1.1, "spe": 1},
+    "SASSY": {"atk": 1, "def": 1, "spa": 1, "spd": 1.1, "spe": 0.9},
+    "CAREFUL": {"atk": 1, "def": 1, "spa": 0.9, "spd": 1.1, "spe": 1},
+    "QUIRKY": {"atk": 1, "def": 1, "spa": 1, "spd": 1, "spe": 1}
 }
 
 type_matrix = {
@@ -56,11 +58,11 @@ def transform_stat_name(stat: str):
         case "defense":
             return "def"
         case "special-attack":
-            return "spatk"
+            return "spa"
         case "special-defense":
-            return "spdef"
-        case "speed":
             return "spd"
+        case "speed":
+            return "spe"
 
 def get_type_effectiveness(move_type: str, target_type: str) -> float:
     try:
@@ -120,24 +122,23 @@ MOVE_CATEGORY = [
     'unique' # e.g., Transform, Mimic, Sketch, Metronome, follow me
 ]
 
-MOVE_TARGET_ENUM = [
-    'specific-move', # p.e. Curse, Counter
-    'selected-pokemon-me-first', # p.e. me-first, max moves
-    'ally', # p.e. Helping Hand
-    'users-field', # p.e. Reflect, Light Screen, Tailwind
-    'user-or-ally', # p.e. acupressure (only)
-    'opponents-field', # p.e. Stealth Rock, Spikes
-    'user', # p.e. Swords Dance, Recover
-    'random-opponent', # p.e. Thrash, Outrage, Struggle
-    'all-other-pokemon', # p.e. Earthquake, Surf
-    'selected-pokemon', # p.e. Shadow Ball, Flamethrower
-    'all-opponents', # p.e. Blizzard, Rock Slide
-    'entire-field', # p.e. Hail, Rain Dance, Trick Room, Grassy Terrain
-    'user-and-allies', # p.e. life-dew, howl
-    'all-pokemon',  # p.e. Perish Song
-    'all-allies', # p.e. Dragon Cheer
-    'fainting-pokemon' # p.e. Revival Blessing
-]
+class MoveTarget(Enum):
+    SPECIFIC_MOVE = 'specific-move' # p.e. Curse, Counter
+    SELECTED_POKEMON_ME_FIRST = 'selected-pokemon-me-first' # p.e. me-first, max moves
+    ALLY = 'ally' # p.e. Helping Hand
+    USERS_FIELD = 'users-field',# p.e. Reflect, Light Screen, Tailwind
+    USER_OR_ALLY = 'user-or-ally' # p.e. acupressure (only)
+    OPPONENTS_FIELD = 'opponents-field' # p.e. Stealth Rock, Spikes
+    USER='user' # p.e. Swords Dance, Recover
+    RANDOM_OPPONENT='random-opponent' # p.e. Thrash, Outrage, Struggle
+    ALL_OTHER_POKEMON='all-other-pokemon' # p.e. Earthquake, Surf
+    SELECTED_POKEMON='selected-pokemon' # p.e. Shadow Ball, Flamethrower
+    ALL_OPPONENTS='all-opponents' # p.e. Blizzard, Rock Slide
+    ENTIRE_FIELD='entire-field' # p.e. Hail, Rain Dance, Trick Room, Grassy Terrain
+    USER_AND_ALLIES='user-and-allies' # p.e. life-dew, howl
+    ALL_POKEMON='all-pokemon' # p.e. Perish Song
+    ALL_ALLIES='all-allies' # p.e. Dragon Cheer
+    FAINTING_POKEMON= 'fainting-pokemon' # p.e. Revival Blessing
 
 MOVE_AILMENT_ENUM = [
     'none',

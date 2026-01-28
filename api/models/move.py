@@ -32,11 +32,7 @@ class Move:
     def __repr__(self):
         return f"name={self.name}, power={self.power}, accuracy={self.accuracy}, pp={self.pp}\n{self.effect_entries}"
 
-    def special_move_stat(self):
-        if self.name is 'body-press':
-            self.atk_stat_used = 'def'
-        if self.name is 'psyshock' or self.name is 'psystrike':
-            self.def_stat_used = 'def'
+
 
 
 def map_json_to_move(json_data):

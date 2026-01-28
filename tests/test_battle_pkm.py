@@ -1,9 +1,8 @@
 from data import Cache
-from api.models import CompetitivePokemon
-from pkm_sim.battle_env.entities.ailment import Burn
 from pkm_sim.battle_env.entities.field import Field
 from pkm_sim.battle_env.entities.pokemon import BattlePokemon
 from pkm_sim.battle_env.turn import Turn, Action
+from pkm_sim.pokemon_builder.competitive_pokemon import CompetitivePokemon
 
 cache = Cache()
 
@@ -12,62 +11,34 @@ bulba = cache.get_pokemon_from_cache('bulbasaur')
 
 pkm_1 = BattlePokemon(CompetitivePokemon(
     name=pika.name,
-    types=pika.types,
-    base_stats=pika.base_stats,
-    abilities=pika.abilities,
-    id=pika.id,
-    height=pika.height,
-    weight=pika.weight,
-    move_list=pika.move_list,
-    img_url=pika.img_url,
     ability="Static",
     item="Light Ball",
     nature="JOLLY",
     ivs={"hp": 31, "atk": 31, "def": 31, "spatk": 31, "spdef": 31, "spd": 31},
     evs={"hp": 0, "atk": 252, "def": 0, "spatk": 0, "spdef": 4, "spd": 252},
-    moves=["thunderbolt", "quick-attack", "iron-tail", "volt-switch"],
-    varieties=pika.varieties,
-    evolution_chain_id=pika.evolution_chain_id
+    moves=["thunderbolt", "quick-attack", "iron-tail", "volt-switch"]
 ))
 
 pkm_2 = BattlePokemon(CompetitivePokemon(
     name=bulba.name,
-    types=bulba.types,
-    base_stats=bulba.base_stats,
-    abilities=bulba.abilities,
-    id=bulba.id,
-    height=bulba.height,
-    weight=bulba.weight,
-    move_list=bulba.move_list,
-    img_url=bulba.img_url,
     ability="Overgrow",
     item="Miracle Seed",
     nature="CALM",
     ivs={"hp": 31, "atk": 31, "def": 31, "spatk": 31, "spdef": 31, "spd": 31},
     evs={"hp": 252, "atk": 0, "def": 0, "spatk": 252, "spdef": 4, "spd": 0},
-    moves=["vine-whip", "quick-attack", "razor-leaf", "sleep-powder"],
-    varieties=bulba.varieties,
-    evolution_chain_id=bulba.evolution_chain_id
+    moves=["vine-whip", "quick-attack", "razor-leaf", "sleep-powder"]
 ))
 
 def test_battle_pkm_init():
     # Placeholder test to ensure the test file is recognized
     pkm = CompetitivePokemon(
         name="Pikachu",
-        types=["Electric"],
-        base_stats={"hp": 35, "atk": 55, "def": 40, "spatk": 50, "spdef": 50, "spd": 90},
-        abilities=["Static"],
-        id=25,
-        height=0.4,
-        weight=6.0,
-        move_list=[],
-        img_url="http://example.com/pikachu.png",
         ability="Static",
         item="Light Ball",
         nature="JOLLY",
         ivs={"hp": 31, "atk": 31, "def": 31, "spatk": 31, "spdef": 31, "spd": 31},
         evs={"hp": 0, "atk": 252, "def": 0, "spatk": 0, "spdef": 4, "spd": 252},
-        moves=["thunderbolt", "Quick Attack", "Iron Tail", "Volt Switch"]
+        moves=["thunderbolt", "Quick Attack", "Iron Tail", "Volt Switch"],
     )
     bt_pkm = BattlePokemon(
         pkm
@@ -106,10 +77,9 @@ def test_turn_order_action():
     assert ordered_actions[1].user == pkm_1
 
 
-def test_ailment_burn():
-    pkm_1.set_ailment_status(Burn(pkm_1))
-    pkm_1.apply_status_effect()
-    assert pkm_1.current_hp == pkm_1.hp_total - (pkm_1.hp_total // 16)
+def test_battle_pkm_from_name():
+    test = BattlePokemon.from_name('pikachu')
+    assert test is not None
 
 
 

@@ -37,21 +37,23 @@ class PokeAPIService:
         """Fetches Pokémon data by name or ID."""
         url = f"{self.BASE_URL}pokemon/{name_or_id}/"
         response = requests.get(url)
+        name_or_id = name_or_id.split('-')[0]
+        pkm_sp = self.get_pokemon_species(name_or_id)
         if response.status_code != 200:
             raise PokeAPIError(f"Error fetching Pokémon data: {response.status_code}")
         pokemon = Pokemon(
+            id=response.json()['id'],
             name=response.json()['name'],
             types=[t['type']['name'].lower() for t in response.json()['types']],
-            id=response.json()['id'],
             abilities=[a['ability']['name'] for a in response.json()['abilities']],
             height=response.json()['height'],
             weight=response.json()['weight'],
             move_list=[m['move']['name'] for m in response.json()['moves']],
             base_stats={transform_stat_name(stat['stat']['name']): stat['base_stat'] for stat in response.json()['stats']},
             img_url=response.json()['sprites']['front_default'],
-            evolution_chain=None,
-            varieties=None,
-            crie_url=response.json()['cries']['latest']
+            crie_url=response.json()['cries']['latest'],
+            evolution_chain=pkm_sp.evolution_chain,
+            varieties=pkm_sp.varieties
         )
         return pokemon
 
@@ -82,18 +84,18 @@ class PokeAPIService:
             stat_changes=stat_changes,
             target=json['target']['name'],
             entries=entry,
-            crit_rate=json['meta']['crit_rate'],
-            ailment=json['meta']['ailment']['name'],
-            ailment_chance=json['meta']['ailment_chance'],
-            category=json['meta']['category']['name'],
-            drain=json['meta']['drain'],
-            flinch_chance=json['meta']['flinch_chance'],
-            healing=json['meta']['healing'],
-            min_hits=json['meta']['min_hits'],
-            max_hits=json['meta']['max_hits'],
-            min_turns=json['meta']['min_turns'],
-            max_turns=json['meta']['max_turns'],
-            stat_chance=json['meta']['stat_chance']
+            crit_rate=json['meta']['crit_rate'] if json['meta'] is not None else 0,
+            ailment=json['meta']['ailment']['name'] if json['meta'] is not None else None,
+            ailment_chance=json['meta']['ailment_chance'] if json['meta'] is not None else 0,
+            category=json['meta']['category']['name'] if json['meta'] is not None else None,
+            drain=json['meta']['drain'] if json['meta'] is not None else 0,
+            flinch_chance=json['meta']['flinch_chance'] if json['meta'] is not None else 0,
+            healing=json['meta']['healing'] if json['meta'] is not None else 0,
+            min_hits=json['meta']['min_hits'] if json['meta'] is not None else None,
+            max_hits=json['meta']['max_hits'] if json['meta'] is not None else None,
+            min_turns=json['meta']['min_turns'] if json['meta'] is not None else None,
+            max_turns=json['meta']['max_turns'] if json['meta'] is not None else None,
+            stat_chance=json['meta']['stat_chance'] if json['meta'] is not None else 0
         )
         return move
 

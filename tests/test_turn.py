@@ -10,20 +10,26 @@ def test_turn_execution():
     initial_hp_a = battle.teams[0][0].current_hp
     initial_hp_b = battle.teams[1][0].current_hp
 
-    field = Field(slot_pkm=[[battle.teams[0][0], battle.teams[0][1]], [battle.teams[1][0], battle.teams[1][1]]],
-                 bench_pkm=[[battle.teams[0][2], battle.teams[0][3]], [battle.teams[1][2], battle.teams[1][3]]])
+    field = Field()
+    field.slots[0][0].pokemon = pkm_1
+    field.slots[0][1].pokemon = pkm_2
+    field.slots[1][0].pokemon = pkm_7
+    field.slots[1][1].pokemon = pkm_8
+    field.bench_pkm = [[pkm_3, pkm_4], [pkm_9, pkm_10]]
 
     turn = Turn(
         0, field,
         actions=[
-            Action(0, field.slot_pkm[0][0], "fake-out", None, None, 'attack', 0),
-            Action(0, field.slot_pkm[0][1], "spore", None, None, 'attack', 0),
-            Action(0, field.slot_pkm[1][0], "make-it-rain", None, None, 'attack', 0),
-            Action(0, field.slot_pkm[1][1], None, field.bench_pkm[1][0], None, 'switch', 0),
+            Action(user_slot=field.slots[0][0], action_type='switch', switch_in=pkm_4),
+            Action(user_slot=field.slots[0][1], action_type='move', battle_move=field.slots[0][1].pokemon.get_move('spore'), target_slot=[field.slots[1][0]]),
+            Action(user_slot=field.slots[1][0], action_type='move', battle_move=field.slots[1][0].pokemon.get_move('make-it-rain'), target_slot=[field.slots[0][0], field.slots[0][1]]),
+            Action(user_slot=field.slots[1][1], action_type='switch', switch_in=pkm_10),
         ]
     )
-
     turn.execute_turn()
+    assert field.slots[0][0].pokemon.pokemon.name is pkm_4.pokemon.name
+
+
 
 
 # =============================================================================

@@ -2,7 +2,7 @@ import math
 import random
 
 
-def damage_calculation(attacker_stat: int, defender_stat: int, move_power: int, targets: float, PB: float, weather: float, GLAIVE_RUSH: int, critical_hit: bool, stab: float, type_: float, burn: float, other: float, z_move: float) -> int:
+def damage_calculation(attacker_stat: int, defender_stat: int, move_power: int, targets: float, weather: float, critical_hit: bool, stab: float, type_: float, burn: float=1.0,GLAIVE_RUSH: int=1.0, PB: float=1.0, other: float=1.0, z_move: float=1.0) -> int:
     # targets is 1 for single target, 0.75 for multiple targets
     # PB is 0.25 if move is second hit from parental bond ability, else 1
     # weather is 1.5 for weather boosting move type, 0.5 for weather weakening move type, else 1
