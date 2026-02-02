@@ -2,6 +2,7 @@ from data import Cache
 from api.models import PokemonSpecies
 from pkm_sim.battle_env.battle import Battle
 from pkm_sim.battle_env.entities.pokemon import BattlePokemon
+from pkm_sim.battle_env.entities.pokemon_party import PokemonParty
 from pkm_sim.pokemon_builder.competitive_pokemon import CompetitivePokemon
 
 cache = Cache()
@@ -137,15 +138,17 @@ pkm_12 = BattlePokemon(CompetitivePokemon(
     evs={"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
     moves=["spore", "rage-powder", "protect", "sludge-bomb"]
 ))
-
+party_1 = PokemonParty([pkm_1, pkm_2, pkm_3, pkm_4, pkm_5, pkm_6])
+party_2 = PokemonParty([pkm_7, pkm_8, pkm_9, pkm_10, pkm_11, pkm_12])
 def test_battle_initialization():
-    battle = Battle([[pkm_1, pkm_2, pkm_3, pkm_4, pkm_5, pkm_6],[pkm_7, pkm_8, pkm_9, pkm_10, pkm_11, pkm_12]])
+    battle = Battle([party_1, party_2])
     assert len(battle.teams) == 2
     assert len(battle.teams[0]) == 4
     assert len(battle.teams[1]) == 4
-    assert battle.field.slot_pkm[0][0] == pkm_1
-    assert battle.field.slot_pkm[0][1] == pkm_2
-    assert battle.field.slot_pkm[1][1] == pkm_8
-    assert battle.field.slot_pkm[1][0] == pkm_7
+    assert battle.field.slots[0][0].pokemon == pkm_1
+    assert battle.field.slots[0][1].pokemon == pkm_2
+    assert battle.field.slots[1][1].pokemon == pkm_8
+    assert battle.field.slots[1][0].pokemon == pkm_7
+    #battle.execute()
 
 

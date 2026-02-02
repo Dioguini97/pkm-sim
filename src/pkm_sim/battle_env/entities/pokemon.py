@@ -5,7 +5,7 @@ from api.models import Move
 from pkm_sim.battle_env.entities.move import BattleMove
 from pkm_sim.battle_env.entities.status import Status, Effect
 from pkm_sim.pokemon_builder.competitive_pokemon import CompetitivePokemon
-from utils import from_name_to_api_read, stage_multipliers
+from utils import from_name_to_api_read, stage_multipliers, Transformation
 from data import Cache
 
 CACHE = Cache()
@@ -40,11 +40,15 @@ class BattlePokemon:
         self.battle_moves = self.get_info_moves(pokemon.moves)
         self.ailment = None
 
+    def get_name(self):
+        return self.pokemon.name if self.pokemon.nickname != self.pokemon.name else self.pokemon.nickname
+
     def is_fainted(self) -> bool:
         return self.current_hp <= 0
 
-    def feint(self):
+    def faint(self):
         self.current_hp = 0
+        self.status = Status.FAINTED
 
     def apply_damage(self, damage: int):
         self.current_hp = max(0, self.current_hp - damage)
@@ -125,4 +129,10 @@ class BattlePokemon:
             return 'spa'
         else:
             return random.choice(['atk', 'spa'])
+
+    def tranform(self, transformation: Transformation):
+        pass # TODO
+
+    def get_types(self):
+        return self.pokemon.pkm.types
 

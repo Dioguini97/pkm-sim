@@ -28,6 +28,6 @@ def test_should_return_move2():
     assert move.damage_class == 'special'
     assert move.pp == 15
     assert move.priority == 0
-    assert move.stat_changes == [['spdef', -1]]
+    assert move.stat_changes == [['spd', -1]]
     assert move.target == 'selected-pokemon'
     assert move.entries.startswith("An attack that may")

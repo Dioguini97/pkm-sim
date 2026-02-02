@@ -1,3 +1,4 @@
+import uuid
 from enum import Enum
 
 natures = {
@@ -140,18 +141,131 @@ class MoveTarget(Enum):
     ALL_ALLIES='all-allies' # p.e. Dragon Cheer
     FAINTING_POKEMON= 'fainting-pokemon' # p.e. Revival Blessing
 
-MOVE_AILMENT_ENUM = [
-    'none',
-    'paralysis',
-    'sleep',
-    'freeze',
-    'burn',
-    'poison',
-    'badly-poison',
-    'confusion',
-    'infatuation',
-    'trap',
-    'nightmare'
-]
+class MoveAilment(Enum):
+    UNKNOWN = 'unknown'
+    NONE = 'none'
+    PAR = 'paralysis'
+    SLP = 'sleep'
+    FRZ = 'freeze'
+    BRN = 'burn'
+    PSN = 'poison'
+    BPSN = 'badly-poison'
+    CONFUSION = 'confusion'
+    INFATUATION = 'infatuation'
+    TRAP = 'trap'
+    NIGHTMARE = 'nightmare'
+    TORMENT = 'torment'
+    DISABLE = 'disable'
+    YAWN = 'yawn'
+    HEAL_BLOCK = 'heal-block'
+    NO_TYPE_IMMUNITY = 'no-type-immunity'
+    LEECH_SEED = 'leech-seed'
+    EMBARGO = 'embargo'
+    PERISH_SONG = 'perish-song'
+    INGRAIN = 'ingrain'
+    SILENCE = 'silence'
+    TAR_SHOT = 'tar-shot'
 
+class ActionType(Enum):
+    ATTACK = 'attack'
+    SWITCH = 'switch'
+    RUN = 'run'
+    
+class Transformation(Enum):
+    MEGA = 'mega'
+    DYNAMAX = 'dynamax'
+    TERA = 'tera'
 
+class DamageClass(Enum):
+    PHYSICAL = 'physical'
+    SPECIAL = 'special'
+    STATUS = 'status'
+
+class PokemonType(Enum):
+    WATER = 'water'
+    FIRE = 'fire'
+    GRASS = 'grass'
+    ELECTRIC = 'electric'
+    FIGHTING = 'fighting'
+    ROCK = 'rock'
+    GROUND = 'ground'
+    ICE = 'ice'
+    STEEL = 'steel'
+    DARK = 'dark'
+    FAIRY = 'fairy'
+    PSYCHIC = 'psychic'
+    BUG = 'bug'
+    FLYING = 'flying'
+    POISON = 'poison'
+    NORMAL = 'normal'
+    GHOST = 'ghost'
+    DRAGON = 'dragon'
+    STELLAR = 'stellar'
+
+class ItemCategory(Enum):
+    STAT_BOOSTS = "stat-boosts"
+    EFFORT_DROP = "effort-drop"
+    MEDICINE = "medicine"
+    OTHER = "other"
+    IN_A_PINCH = "in-a-pinch"
+    PICKY_HEALING = "picky-healing"
+    TYPE_PROTECTION = "type-protection"
+    BAKING_ONLY = "baking-only"
+    COLLECTIBLES = "collectibles"
+    EVOLUTION = "evolution"
+    SPELUNKING = "spelunking"
+    HELD_ITEMS = "held-items"
+    CHOICE = "choice"
+    EFFORT_TRAINING = "effort-training"
+    BAD_HELD_ITEMS = "bad-held-items"
+    TRAINING = "training"
+    PLATES = "plates"
+    SPECIES_SPECIFIC = "species-specific"
+    TYPE_ENHANCEMENT = "type-enhancement"
+    EVENT_ITEMS = "event-items"
+    GAMEPLAY = "gameplay"
+    PLOT_ADVANCEMENT = "plot-advancement"
+    UNUSED = "unused"
+    LOOT = "loot"
+    ALL_MAIL = "all-mail"
+    VITAMINS = "vitamins"
+    HEALING = "healing"
+    PP_RECOVERY = "pp-recovery"
+    REVIVAL = "revival"
+    STATUS_CURES = "status-cures"
+    MULCH = "mulch"
+    SPECIAL_BALLS = "special-balls"
+    STANDARD_BALLS = "standard-balls"
+    DEX_COMPLETION = "dex-completion"
+    SCARVES = "scarves"
+    ALL_MACHINES = "all-machines"
+    FLUTES = "flutes"
+    APRICORN_BALLS = "apricorn-balls"
+    APRICORN_BOX = "apricorn-box"
+    DATA_CARDS = "data-cards"
+    JEWELS = "jewels"
+    MIRACLE_SHOOTER = "miracle-shooter"
+    MEGA_STONES = "mega-stones"
+    MEMORIES = "memories"
+    Z_CRYSTALS = "z-crystals"
+    SPECIES_CANDIES = "species-candies"
+    CATCHING_BONUS = "catching-bonus"
+    DYNAMAX_CRYSTALS = "dynamax-crystals"
+    NATURE_MINTS = "nature-mints"
+    CURRY_INGREDIENTS = "curry-ingredients"
+    TERA_SHARD = "tera-shard"
+    SANDWICH_INGREDIENTS = "sandwich-ingredients"
+    TM_MATERIALS = "tm-materials"
+    PICNIC = "picnic"
+
+class ItemAttribute(Enum):
+    COUNTABLE = 'countable'
+    CONSUMABLE = 'consumable'
+    USABLE_OVERWORLD = 'usable-overworld'
+    USABLE_IN_BATTLE = 'usable-in-battle'
+    HOLDABLE_ACTIVE = 'holdable-active'
+    HOLDABLE_PASSIVE = 'holdable-passive'
+    UNDERGROUND = 'underground'
+
+def generate_uuid():
+    return uuid.uuid4()

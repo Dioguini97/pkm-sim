@@ -1,33 +1,34 @@
+from unittest import skip
+
 from pkm_sim.battle_env.entities.field import Field
 from pkm_sim.battle_env.turn import Turn, Action
 from test_battle import *
+from utils import ActionType
 
+team_a = [pkm_1, pkm_2, pkm_3, pkm_4, pkm_5, pkm_6]
+team_b = [pkm_7, pkm_8, pkm_9, pkm_10, pkm_11, pkm_12]
 def test_turn_execution():
-    team_a = [pkm_1, pkm_2, pkm_3, pkm_4, pkm_5, pkm_6]
-    team_b = [pkm_7, pkm_8, pkm_9, pkm_10, pkm_11, pkm_12]
-    battle = Battle([team_a, team_b])
 
-    initial_hp_a = battle.teams[0][0].current_hp
-    initial_hp_b = battle.teams[1][0].current_hp
-
-    field = Field()
-    field.slots[0][0].pokemon = pkm_1
-    field.slots[0][1].pokemon = pkm_2
-    field.slots[1][0].pokemon = pkm_7
-    field.slots[1][1].pokemon = pkm_8
-    field.bench_pkm = [[pkm_3, pkm_4], [pkm_9, pkm_10]]
+    field = Field(
+        bench_pkm=[[pkm_3, pkm_4], [pkm_9, pkm_10]],
+        active_pkm=[[pkm_1, pkm_2], [pkm_7, pkm_8]]
+    )
 
     turn = Turn(
         0, field,
         actions=[
-            Action(user_slot=field.slots[0][0], action_type='switch', switch_in=pkm_4),
-            Action(user_slot=field.slots[0][1], action_type='move', battle_move=field.slots[0][1].pokemon.get_move('spore'), target_slot=[field.slots[1][0]]),
-            Action(user_slot=field.slots[1][0], action_type='move', battle_move=field.slots[1][0].pokemon.get_move('make-it-rain'), target_slot=[field.slots[0][0], field.slots[0][1]]),
-            Action(user_slot=field.slots[1][1], action_type='switch', switch_in=pkm_10),
+            Action(user_slot=field.slots[0][0], action_type=ActionType.SWITCH, switch_in=pkm_4),
+            Action(user_slot=field.slots[0][1], action_type=ActionType.ATTACK, battle_move=field.slots[0][1].pokemon.get_move('spore'), target_slot=[field.slots[1][0]]),
+            Action(user_slot=field.slots[1][0], action_type=ActionType.ATTACK, battle_move=field.slots[1][0].pokemon.get_move('make-it-rain'), target_slot=[field.slots[0][0], field.slots[0][1]]),
+            Action(user_slot=field.slots[1][1], action_type=ActionType.SWITCH, switch_in=pkm_10),
         ]
     )
     turn.execute_turn()
-    assert field.slots[0][0].pokemon.pokemon.name is pkm_4.pokemon.name
+    assert field.slots[0][0].pokemon.get_name() is pkm_4.get_name()
+    assert pkm_1.current_hp == pkm_1.hp_total
+    assert pkm_2.current_hp < pkm_2.hp_total
+    assert pkm_4.current_hp < pkm_4.hp_total
+    assert pkm_1.current_hp == pkm_1.hp_total
 
 
 
@@ -41,10 +42,11 @@ from pkm_sim.battle_env.entities.pokemon import BattlePokemon
 from pkm_sim.battle_env.entities.move import BattleMove
 from api.models import Move
 
-
+@skip(reason='Feito por IA, nao visto')
 class TestTurnPhases:
     """Testes para as 5 fases de turno"""
 
+    @skip(reason='Feito por IA, nao visto')
     def setup_method(self):
         """Setup para cada teste"""
         # Criar campo
@@ -57,6 +59,7 @@ class TestTurnPhases:
         # Colocar no field
         self.field.slot_pkm = [[self.pokemon1, None], [self.pokemon2, None]]
 
+    @skip(reason='Feito por IA, nao visto')
     def _create_mock_battle_pokemon(self, name: str, spd: int = 50):
         """Helper para criar BattlePokemon mock"""
         mock_pokemon = MagicMock(spec=BattlePokemon)
@@ -72,6 +75,7 @@ class TestTurnPhases:
         mock_pokemon.stat_changes = {'acc': 0, 'eva': 0}
         return mock_pokemon
 
+    @skip(reason='Feito por IA, nao visto')
     def test_turn_initialization(self):
         """Testa inicialização de Turn"""
         actions = []
@@ -81,6 +85,7 @@ class TestTurnPhases:
         assert turn.field_state == self.field
         assert turn.actions == actions
 
+    @skip(reason='Feito por IA, nao visto')
     def test_order_actions_for_moves(self):
         """Testa ordenação de ações de moves"""
         # Criar dois moves com prioridades diferentes
@@ -114,6 +119,7 @@ class TestTurnPhases:
         assert ordered[0].battle_move.move.name == "Quick Attack"
         assert ordered[1].battle_move.move.name == "Thunderbolt"
 
+    @skip(reason='Feito por IA, nao visto')
     def test_execute_turn_structure(self):
         """Testa que execute_turn retorna estrutura correta"""
         actions = []

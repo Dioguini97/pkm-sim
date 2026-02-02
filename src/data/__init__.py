@@ -5,8 +5,11 @@ from api.pokeAPI import PokeAPIService
 from api.models import Pokemon, Move
 from api.models.move import map_json_to_move
 from api.models.pokemon import map_json_to_pkm, PokemonSpecies, map_json_to_pkm_sp
+from  pymongo import MongoClient
 
 poke_api_service = PokeAPIService()
+mongo = MongoClient('mongodb://localhost:27017')
+db = mongo['pokemon']
 
 class Cache:
     """Class to handle caching of Pokémon data."""
@@ -97,6 +100,7 @@ class Cache:
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w', encoding="utf-8") as file:
                 json.dump(pokemon.__dict__, file, ensure_ascii=False, indent=4)
+            db.get_collection('pokemon').insert_one(pokemon.__dict__)
         else:
             pass
 
@@ -106,6 +110,7 @@ class Cache:
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w', encoding="utf-8") as file:
                 json.dump(move.__dict__, file, ensure_ascii=False, indent=4)
+            db.get_collection('move').insert_one(move.__dict__)
         else:
             pass
 
@@ -115,6 +120,7 @@ class Cache:
             file_path.parent.mkdir(parents=True, exist_ok=True)
             with file_path.open('w', encoding="utf-8") as file:
                 json.dump(pokemon_species.__dict__, file, ensure_ascii=False, indent=4)
+            db.get_collection('pokemon-species').insert_one(pokemon_species.__dict__)
         else:
             pass
 
@@ -139,4 +145,20 @@ class Cache:
         else:
             pass
 
+    def get_pokemon_party_from_db(self, id_or_name):
+        try:
+            return db.get_collection('parties').find({"id": id_or_name})
+        finally:
+            return db.get_collection('parties').find({"name": id_or_name})
 
+    def get_all_pokemon_from_db(self):
+        try:
+            return db.get_collection('pokemon').find()
+        except:
+            raise Exception('Failed connection to db')
+
+    def get_all_pokemon_names(self):
+        try:
+            return [x['name'] for x in self.get_all_pokemon_from_db()]
+        except:
+            raise Exception('Failed connection to db')

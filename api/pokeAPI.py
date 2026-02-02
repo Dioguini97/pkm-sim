@@ -2,6 +2,7 @@ import requests
 
 from api.models import Pokemon, Move, PokemonSpecies
 from api.models import Ability
+from api.models.item import Item
 from utils import transform_stat_name, from_name_to_api_read
 
 
@@ -111,6 +112,25 @@ class PokeAPIService:
             id=json['id'],
             name=json['name'],
             description=description
+        )
+
+
+    def get_item(self, name_or_id):
+        """Fetches item data by name or ID."""
+        name_or_id = from_name_to_api_read(name_or_id)
+        url = f"{self.BASE_URL}item/{name_or_id}/"
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise PokeAPIError(f"Error fetching item data: {response.status_code}")
+        json = response.json()
+        return Item(
+            name=json['name'],
+            id=json['id'],
+            img_url=json['sprites']['default'],
+            attributes=[att.name for att in json['attributes']],
+            category=json['category']['name'],
+            fling_power=json['fling_power'],
+            fling_effect=json['fling_effect']['name']
         )
 
 

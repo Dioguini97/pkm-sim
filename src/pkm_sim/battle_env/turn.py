@@ -2,12 +2,13 @@ from __future__ import annotations
 from pkm_sim.battle_env.entities.field import Field, BattleSlot
 from pkm_sim.battle_env.entities.pokemon import BattlePokemon
 from pkm_sim.battle_env.entities.move import BattleMove
+from utils import ActionType, Transformation, DamageClass
 
 
 class Action:
-    def __init__(self, user_slot: BattleSlot | None, action_type: str,
+    def __init__(self, user_slot: BattleSlot | None, action_type: ActionType,
                  battle_move: BattleMove | None = None, target_slot: list[BattleSlot] | None = None,
-                 switch_in: BattlePokemon | None = None, transformation: str | None = None):
+                 switch_in: BattlePokemon | None = None, transformation: Transformation | None = None):
         self.user_slot = user_slot
         self.action_type = action_type
         self.battle_move = battle_move  # Agora é BattleMove em vez de Move
@@ -45,7 +46,7 @@ class Turn:
         )
 
     def order_actions_for_switch(self) -> list[Action]:
-        switch_actions = [action for action in self.actions if action.action_type == "switch"]
+        switch_actions = [action for action in self.actions if action.action_type == ActionType.SWITCH]
         return sorted(
             switch_actions,
             key=lambda action: (action.user_slot.pokemon.stats['spe']),
@@ -91,16 +92,15 @@ class Turn:
             self.field_state.switch(action.user_slot, action.switch_in)
             #results['switches'].append(message)
 
-    def _execute_transformation_phase(self, results: dict):
+    def _execute_transformation_phase(self):
         """Phase 2: Executa transformações em ordem de velocidade."""
         transform_actions = [action for action in self.actions if action.transformation is not None]
         transform_actions.sort(key=lambda x: x.user.pokemon.base_stats['spd'], reverse=True)
 
         for action in transform_actions:
-            message = f"{action.user.pokemon.name} is transforming into {action.transformation}!"
-            print(message)
-            results['transformations'].append(message)
+            print(f"{action.user.pokemon.name} is transforming into {action.transformation}!")
             # TODO: Aplicar lógica de transformação
+
 
     def _execute_move_phase(self, results: dict):
         """Phase 3: Executa moves em ordem de prioridade e velocidade."""
@@ -147,13 +147,13 @@ class Turn:
 
     def _execute_move(self, action: Action):
         move = action.battle_move
-        user = action.user_slot.pokemon
+        user_slot = action.user_slot
 
-        move.consume_pp()
+        move.consume_pp() #TODO nao deve consumir se o move não acertar
 
         for target in action.target_slot:
-            if target.is_empty():
-                continue
-            if move.move.damage_class != 'status':
-                damage = move._calculate_damage(user, target.pokemon)
+            if move.move.damage_class == DamageClass.STATUS.value:
+                print('Status move')
+            else:
+                damage = move._execute(user_slot, target, self.field_state)
                 target.pokemon.apply_damage(damage)

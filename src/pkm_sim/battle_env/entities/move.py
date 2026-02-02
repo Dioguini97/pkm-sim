@@ -2,11 +2,16 @@ from __future__ import annotations
 import math
 import random
 from calendar import day_abbr
+from typing import TYPE_CHECKING
 
 from api.models import Move
 from pkm_sim.battle_env import damage_calculation
 from pkm_sim.battle_env.entities.status import Status
 from utils import get_type_effectiveness, stage_multipliers_acc_eva, MoveTarget
+
+if TYPE_CHECKING:
+    from pkm_sim.battle_env.entities.field import BattleSlot
+
 
 
 class BattleMove:
@@ -18,10 +23,10 @@ class BattleMove:
 
     def __init__(self, move: Move):
         self.move = move  # Dados estáticos do move
-        self.pp_remaining = move.pp  # PP consumível durante a batalha
+        self.pp_remaining = self.max_pp(move.pp ) # PP consumível durante a batalha
         self.atk_stat_used = self.get_atk_stat_used()
         self.def_stat_used = self.get_def_stat_used()
-        self.changes = self.stat_changes()
+        self.stat_changes = self.stat_changes()
 
     def __repr__(self):
         return f"BattleMove({self.move.name}, PP: {self.pp_remaining}/{self.move.pp})"
@@ -79,7 +84,7 @@ class BattleMove:
 
     def have_ailment(self):
         """Retorna se o move pode causar um status condition."""
-        return self.move.ailment != 'none' and self.move.ailment is not None
+        return self.move.ailment != 'none'
 
     def stat_changes(self):
         changes = {}
@@ -117,18 +122,22 @@ class BattleMove:
     #     return random.randint(1, 100) <= math.floor(modified_accuracy)
     #
 
-    def _calculate_damage(self, user, target) -> int:
-        """Calcula o dano do move."""
+    def _calculate_damage(self, user, target, field) -> int:
+        """Calcula o dano do move.
+        user: BattleSlot
+        target: BattlePokemon
+        field: Field
+        """
         # Se move não tem poder, retorna 0 (move de status ou sem efeito de dano)
         move_power = self.calculate_power()
 
-        critical_hit = self._is_critical_hit(user.stat_stages['crit'] + self.move.crit_rate)
+        critical_hit = self._is_critical_hit(user.pokemon.stat_stages['crit'] + self.move.crit_rate)
 
         if critical_hit:
-            attacker_stat = max(user.stats[self.get_atk_stat_used()], user.pokemon.raw_stats[self.get_atk_stat_used()])
+            attacker_stat = max(user.pokemon.stats[self.get_atk_stat_used()], user.pokemon.pokemon.raw_stats[self.get_atk_stat_used()])
             defender_stat = min(target.stats[self.get_def_stat_used()], target.pokemon.raw_stats[self.get_def_stat_used()])
         else:
-            attacker_stat = user.stats[self.get_atk_stat_used()]
+            attacker_stat = user.pokemon.stats[self.get_atk_stat_used()]
             defender_stat = target.stats[self.get_def_stat_used()]
 
         # Verficar se é Physical e se está burned
@@ -137,13 +146,13 @@ class BattleMove:
             burn = 0.5
 
         # Calcular multiplicadores
-        target_multiplier = 0.75 if self.move.target in [MoveTarget.ALL_OPPONENTS.value, MoveTarget.ALL_OTHER_POKEMON.value, MoveTarget.ALL_POKEMON.value] else 1
+        target_multiplier = self._calculate_target_multiplier(user, field)
 
-        stab = 1.5 if self.move.move_type in user.pokemon.pkm.types else 1.0
+        stab = 1.5 if self.move.move_type in user.pokemon.get_types() else 1.0
 
         # Type effectiveness
         type_multiplier = 1.0
-        for target_type in target.pokemon.pkm.types:
+        for target_type in target.get_types():
             type_multiplier *= get_type_effectiveness(self.move.move_type, target_type)
 
         # Aplicar cálculo de dano
@@ -163,13 +172,24 @@ class BattleMove:
             z_move=1
         )
 
-        print(f'The {user.pokemon.name} used {self.move.name} on {target.pokemon.name}')
+        print(f'The {user.pokemon.get_name()} used {self.move.name} on {target.get_name()}')
         print(f'Used is {attacker_stat} in target\'s {defender_stat} with {move_power} power and a target multiplier of {target_multiplier}.')
         print(f'Critical? {critical_hit} with {stab} stab power and {type_multiplier} effectiveness')
         print(f'Did {damage} damage')
 
 
         return max(1, damage)
+
+    def _calculate_target_multiplier(self, user: BattleSlot, field):
+        if self.move.target in [MoveTarget.ALL_OPPONENTS.value, MoveTarget.ALL_OTHER_POKEMON.value]: # Spread moves
+            user_side_number = field.get_ally_is_fainted_int(user.side, user.index)
+            foe_side_number = field.get_foe_effective_slot_number(user.side)
+            if self.move.target == MoveTarget.ALL_OTHER_POKEMON.value:
+                return 1 if user_side_number + foe_side_number == 1 else 0.75
+            else:
+                return 1 if foe_side_number == 1 else 0.75
+        else:
+            return 1
     #
     # def _apply_ailment(self):
     #     pass
@@ -236,3 +256,17 @@ class BattleMove:
         }
         chance = critical_hit_chances.get(critical_stage, 1 / 24)
         return random.random() < chance
+
+    def _execute(self, user: BattleSlot, target: BattleSlot, field):
+
+        if (self.move.min_hits is None) & (self.move.max_hits is None):
+            damage = self._calculate_damage(user, target.pokemon, field)
+            return damage
+        else: # multi hits moves
+            for hit in range(self.move.min_hits, self.move.max_hits):
+                damage = self._calculate_damage(user.pokemon, target.pokemon, field)
+                target.pokemon.apply_damage(damage) # Pode ter que se mudar por causa de multi hit moves
+
+
+    def max_pp(self, raw_pp: int):
+        return math.floor(self.move.pp * 1.6)

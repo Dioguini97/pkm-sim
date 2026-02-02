@@ -46,6 +46,5 @@ class CompetitivePokemon:
         self.raw_stats['spe'] = self.calculate_stat(self.pkm.base_stats['spe'], self.ivs.get('spe'), self.evs.get('spe'), self.level, natures[self.nature]['spe'])
 
     def __str__(self):
-        return f"{self.name} (Level {self.level}) - Nature: {self.nature}, Ability: {self.ability}, Item: {self.item}\n" \
-               f"Stats: HP: {self.base_stats}\n"
+        return f"{self.name} (Level {self.level})"
 

@@ -1,3 +1,6 @@
+from utils import PokemonType
+
+
 class PokemonSpecies:
     def __init__(self, id: int, name: str, evolution_chain=None, varieties: list=None):
         self.id = id
@@ -23,9 +26,9 @@ class PokemonSpecies:
 
 class Pokemon(PokemonSpecies):
     def __init__(self, id: int, name: str, types: list, base_stats: dict, abilities: list, height: float, weight: float,
-                 move_list: list, img_url: str, crie_url: str, evolution_chain=None, varieties: list = None):
+                 move_list: list, img_url: str, crie_url: str=None, evolution_chain=None, varieties: list = None):
         super().__init__(id, name, evolution_chain, varieties)
-        self.types = types
+        self.types = [PokemonType(_type) if isinstance(_type, PokemonType) else _type for _type in types]
         self.base_stats = base_stats
         self.abilities = abilities
         self.height = height
@@ -58,5 +61,4 @@ def map_json_to_pkm_sp(json) -> PokemonSpecies:
         evolution_chain=json['evolution_chain'],
         varieties=json['varieties']
     )
-    pkm.does_it_evolve = json['does_it_evolve']
     return pkm

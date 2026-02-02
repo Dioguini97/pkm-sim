@@ -1,30 +1,31 @@
 from pkm_sim.battle_env.entities.field import Field
 from pkm_sim.battle_env.entities.pokemon import BattlePokemon
+from pkm_sim.battle_env.entities.pokemon_party import PokemonParty
 from pkm_sim.battle_env.turn import Action, Turn
 
 
 class Battle:
-    def __init__(self, parties: list[list[BattlePokemon]]):
+    def __init__(self, parties: list[PokemonParty]):
+        self.id = id(self)
         self.teams: list[list[BattlePokemon]] = [] # 4 pkm
         self.parties =  parties # 6 pkm
         self.field = None  # Placeholder for Field object
         self.number_of_turns = 0
         self.init_battle()
 
-    def chose_order_pokemon(self):
-        for player, party in enumerate(self.parties):
-            print(f'Player {player+1}, choose the order your Pokémon will take (can only chose 4):')
-            for i, pokemon in enumerate(party):
-                print(f'{i}. {pokemon}')
-            chosen_order = '0 1 2 3' #input('Escolha a ordem colando o número do Pokemon por ordem que quer. (ex. 2 4 6 3)')
-            chosen_order = chosen_order.split(' ')
-            team: list[BattlePokemon] = []
-            for j in chosen_order:
-                team.append(party[int(j)])
-            self.teams.append(team)
+    def chose_order_pokemon(self, player_ind: int, player_order: list[int]):
+        if len(player_order) != 4:
+            raise Exception('You have to chose 4 Pokemon!')
+        team: list[BattlePokemon] = []
+        for ind, pkm in enumerate(self.parties[player_ind].pokemons):
+            if ind in player_order:
+                team.append(pkm)
+        self.teams.append(team)
+
 
     def init_battle(self):
-        self.chose_order_pokemon()
+        for player in range(len(self.parties)):
+            self.chose_order_pokemon(player, [0,1,2,3]) # tenho que arranjar maneira de fazer esta parte TODO
         self.set_up_field()
 
     def is_battle_over(self):
@@ -39,7 +40,9 @@ class Battle:
             terrain=None,
             gravity=False,
             trick_room=False,
-            side_conditions=[None, None]
+            side_conditions=[None, None],
+            active_pkm=[self.teams[0][:2], self.teams[1][:2]],
+            bench_pkm=[self.teams[0][2:], self.teams[1][2:]]
         )
         self.field = field
 
